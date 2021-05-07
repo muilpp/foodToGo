@@ -11,13 +11,7 @@ const storesFileName = "availableStores.txt"
 const bearerFileName = "authBearer.txt"
 
 func readBearerFromFile() string {
-	content, err := ioutil.ReadFile(bearerFileName)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return string(bytes.TrimSpace(content))
+	return readFile(bearerFileName)
 }
 
 func writeBearerToFile(bearer string) {
@@ -37,13 +31,7 @@ func writeBearerToFile(bearer string) {
 }
 
 func readStoresFromFile() string {
-	content, err := ioutil.ReadFile(storesFileName)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return string(content)
+	return readFile(storesFileName)
 }
 
 func writeAvailableStoresToFile(stores []string) {
@@ -62,4 +50,14 @@ func writeAvailableStoresToFile(stores []string) {
 			log.Fatal(err2)
 		}
 	}
+}
+
+func readFile(fileName string) string {
+	content, err := ioutil.ReadFile(fileName)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return string(bytes.TrimSpace(content))
 }

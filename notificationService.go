@@ -3,6 +3,8 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"log"
+	"net/http"
 	"os"
 	"strings"
 
@@ -35,4 +37,16 @@ func sendMail(message string) {
 	}
 
 	return
+}
+
+func sendTelegramMessage(message string) {
+	telegramToken := os.Getenv("TELEGRAM_API_TOKEN")
+	telegramChatId := os.Getenv("TELEGRAM_CHAT_ID")
+
+	requestUrl := "https://api.telegram.org/bot" + telegramToken + "/sendMessage?chat_id=" + telegramChatId + "&text=" + message
+
+	_, err := http.Get(requestUrl)
+	if err != nil {
+		log.Fatalln(err)
+	}
 }

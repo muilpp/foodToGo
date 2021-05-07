@@ -21,5 +21,6 @@ func main() {
 
 	if len(availableStores) > 0 {
 		sendMail(strings.Join(availableStores, ","))
+		sendTelegramMessage(strings.Join(availableStores, ","))
 	}
 }

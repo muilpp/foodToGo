@@ -6,13 +6,16 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 )
 
 type AuthResponse struct {
 	Token string `json:"access_token"`
 }
 
-func getAuthBearer(mail string, password string) string {
+func getAuthBearer() string {
+	mail := os.Getenv("API_USER")
+	password := os.Getenv("API_PASSWORD")
 
 	values := map[string]string{"device_type": "ANDROID", "email": mail, "password": password}
 	json_data, err := json.Marshal(values)
@@ -37,5 +40,6 @@ func getAuthBearer(mail string, password string) string {
 	var authResponseObject AuthResponse
 	json.Unmarshal(body, &authResponseObject)
 
+	writeBearerToFile(authResponseObject.Token)
 	return authResponseObject.Token
 }

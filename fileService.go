@@ -34,7 +34,7 @@ func readStoresFromFile() string {
 	return readFile(storesFileName)
 }
 
-func writeAvailableStoresToFile(stores []string) {
+func writeStoresToFile(stores []string) {
 	f, err := os.OpenFile(storesFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
 
 	if err != nil {

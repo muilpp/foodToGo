@@ -18,8 +18,12 @@ func sendMail(message string) {
 	mailTo := os.Getenv("MAIL_TO")
 	mailPassword := os.Getenv("MAIL_PASSWORD")
 	mailSubject := os.Getenv("MAIL_SUBJECT")
-	sliceTo := strings.Split(mailTo, ",")
 
+	if mailFrom == "" || mailTo == "" || mailPassword == "" {
+		return
+	}
+
+	sliceTo := strings.Split(mailTo, ",")
 	m.SetHeader("From", mailFrom)
 	m.SetHeader("To", sliceTo...)
 	m.SetHeader("Subject", mailSubject)
@@ -42,6 +46,10 @@ func sendMail(message string) {
 func sendTelegramMessage(message string) {
 	telegramToken := os.Getenv("TELEGRAM_API_TOKEN")
 	telegramChatId := os.Getenv("TELEGRAM_CHAT_ID")
+
+	if telegramToken == "" || telegramChatId == "" {
+		return
+	}
 
 	requestUrl := "https://api.telegram.org/bot" + telegramToken + "/sendMessage?chat_id=" + telegramChatId + "&text=" + message
 

@@ -15,10 +15,10 @@ func main() {
 	}
 
 	bearerToken := readBearerFromFile()
-	availableStores := getFood(bearerToken)
+	availableStores := getStoresWithFood(bearerToken)
 
 	if len(availableStores) > 0 {
-		writeAvailableStoresToFile(availableStores)
+		writeStoresToFile(availableStores)
 
 		storesString := strings.Join(availableStores, ",")
 		sendMail(storesString)

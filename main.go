@@ -17,10 +17,11 @@ func main() {
 	bearerToken := readBearerFromFile()
 	availableStores := getFood(bearerToken)
 
-	writeAvailableStoresToFile(availableStores)
-
 	if len(availableStores) > 0 {
-		sendMail(strings.Join(availableStores, ","))
-		sendTelegramMessage(strings.Join(availableStores, ","))
+		writeAvailableStoresToFile(availableStores)
+
+		storesString := strings.Join(availableStores, ",")
+		sendMail(storesString)
+		sendTelegramMessage(storesString)
 	}
 }

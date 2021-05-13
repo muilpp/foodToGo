@@ -199,10 +199,8 @@ func checkStoresInResponse(response FoodJson) []string {
 	storesInFile := readStoresFromFile()
 	for _, grouping := range response.Groupings {
 		for _, item := range grouping.DiscoverBucket.Items {
-			if item.ItemsAvailable > 0 {
-				if !strings.Contains(storesInFile, item.Store.StoreName) {
-					stores = append(stores, item.Store.StoreName)
-				}
+			if item.ItemsAvailable > 0 && !strings.Contains(storesInFile, item.Store.StoreName) {
+				stores = append(stores, item.Store.StoreName)
 			}
 		}
 	}

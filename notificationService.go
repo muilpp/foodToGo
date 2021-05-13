@@ -39,8 +39,6 @@ func sendMail(message string) {
 		fmt.Println(err)
 		panic(err)
 	}
-
-	return
 }
 
 func sendTelegramMessage(message string) {

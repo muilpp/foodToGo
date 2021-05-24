@@ -14,14 +14,16 @@ func main() {
 		log.Fatalf("Error loading .env file")
 	}
 
-	bearerToken := readBearerFromFile()
-	availableStores := getStoresWithFood(bearerToken)
+	fileService, notificationService, foodApi := IntializeServices()
+
+	bearerToken := fileService.ReadBearerFromFile()
+	availableStores := foodApi.GetStoresWithFood(bearerToken)
 
 	if len(availableStores) > 0 {
-		writeStoresToFile(availableStores)
+		fileService.WriteStoresToFile(availableStores)
 
 		storesString := strings.Join(availableStores, ",")
-		sendMail(storesString)
-		sendTelegramMessage(storesString)
+		notificationService.SendMail(storesString)
+		notificationService.SendTelegramMessage(storesString)
 	}
 }

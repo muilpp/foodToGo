@@ -1,4 +1,4 @@
-package main
+package domain
 
 import (
 	"bytes"
@@ -7,14 +7,21 @@ import (
 	"os"
 )
 
-const storesFileName = "availableStores.txt"
-const bearerFileName = "authBearer.txt"
+const storesFileName = "resources/availableStores.txt"
+const bearerFileName = "resources/authBearer.txt"
 
-func readBearerFromFile() string {
-	return readFile(bearerFileName)
+type FileService struct {
 }
 
-func writeBearerToFile(bearer string) {
+func NewFileService() *FileService {
+	return &FileService{}
+}
+
+func (fs *FileService) ReadBearerFromFile() string {
+	return fs.readFile(bearerFileName)
+}
+
+func (fs *FileService) WriteBearerToFile(bearer string) {
 	f, err := os.Create(bearerFileName)
 
 	if err != nil {
@@ -30,11 +37,11 @@ func writeBearerToFile(bearer string) {
 	}
 }
 
-func readStoresFromFile() string {
-	return readFile(storesFileName)
+func (fs *FileService) ReadStoresFromFile() string {
+	return fs.readFile(storesFileName)
 }
 
-func writeStoresToFile(stores []string) {
+func (fs *FileService) WriteStoresToFile(stores []string) {
 	f, err := os.OpenFile(storesFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
 
 	if err != nil {
@@ -52,7 +59,7 @@ func writeStoresToFile(stores []string) {
 	}
 }
 
-func readFile(fileName string) string {
+func (fs *FileService) readFile(fileName string) string {
 	content, err := ioutil.ReadFile(fileName)
 
 	if err != nil {

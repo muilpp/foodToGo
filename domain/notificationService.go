@@ -1,4 +1,4 @@
-package main
+package domain
 
 import (
 	"crypto/tls"
@@ -11,7 +11,14 @@ import (
 	gomail "gopkg.in/mail.v2"
 )
 
-func sendMail(message string) {
+type NotificationService struct {
+}
+
+func NewNotificationService() *NotificationService {
+	return &NotificationService{}
+}
+
+func (ns NotificationService) SendMail(message string) {
 	m := gomail.NewMessage()
 
 	mailFrom := os.Getenv("MAIL_FROM")
@@ -41,7 +48,7 @@ func sendMail(message string) {
 	}
 }
 
-func sendTelegramMessage(message string) {
+func (ns NotificationService) SendTelegramMessage(message string) {
 	telegramToken := os.Getenv("TELEGRAM_API_TOKEN")
 	telegramChatId := os.Getenv("TELEGRAM_CHAT_ID")
 

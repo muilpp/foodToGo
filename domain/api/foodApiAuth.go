@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"bytes"
@@ -7,13 +7,23 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/marc/get-food-to-go/domain"
 )
+
+type FoodApiAuth struct {
+	fileService *domain.FileService
+}
+
+func NewFoodApiAuth(fs *domain.FileService) *FoodApiAuth {
+	return &FoodApiAuth{fs}
+}
 
 type AuthResponse struct {
 	Token string `json:"access_token"`
 }
 
-func getAuthBearer() string {
+func (apiAuth FoodApiAuth) GetAuthBearer() string {
 	mail := os.Getenv("API_USER")
 	password := os.Getenv("API_PASSWORD")
 
@@ -40,6 +50,6 @@ func getAuthBearer() string {
 	var authResponseObject AuthResponse
 	json.Unmarshal(body, &authResponseObject)
 
-	writeBearerToFile(authResponseObject.Token)
+	apiAuth.fileService.WriteBearerToFile(authResponseObject.Token)
 	return authResponseObject.Token
 }

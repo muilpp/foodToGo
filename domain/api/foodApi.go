@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"bytes"
@@ -10,6 +10,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/marc/get-food-to-go/domain"
 )
 
 const MAX_TRIES = 1
@@ -127,13 +129,20 @@ type FoodJson struct {
 	EnabledDiscoverExperiments []string `json:"enabled_discover_experiments"`
 }
 
-func getStoresWithFood(bearerToken string) []string {
+type FoodApi struct {
+	foodAuth    *FoodApiAuth
+	fileService *domain.FileService
+}
+
+func NewFoodApi(fs *domain.FileService) *FoodApi {
+	return &FoodApi{NewFoodApiAuth(fs), fs}
+}
+
+func (foodApi FoodApi) GetStoresWithFood(bearerToken string) []string {
 
 	if bearerToken == "" {
-		bearerToken = getAuthBearer()
+		bearerToken = foodApi.foodAuth.GetAuthBearer()
 		fmt.Println("Current bearer empty, getting a new one")
-	} else {
-		fmt.Println("Bearer already present from last request")
 	}
 
 	requestBody := buildRequestBody()
@@ -159,8 +168,8 @@ func getStoresWithFood(bearerToken string) []string {
 	if resp.StatusCode == 401 && currentTries < MAX_TRIES {
 		currentTries++
 		fmt.Println("Unauthorized request, get new bearer")
-		authBearer := getAuthBearer()
-		getStoresWithFood(authBearer)
+		authBearer := foodApi.foodAuth.GetAuthBearer()
+		foodApi.GetStoresWithFood(authBearer)
 	} else if resp.StatusCode != 200 {
 		fmt.Println("Response status: ", resp.StatusCode)
 	}
@@ -173,7 +182,7 @@ func getStoresWithFood(bearerToken string) []string {
 	var responseStruct FoodJson
 	json.Unmarshal(body, &responseStruct)
 
-	return checkStoresInResponse(responseStruct)
+	return foodApi.checkStoresInResponse(responseStruct)
 }
 
 func buildRequestBody() []byte {
@@ -193,10 +202,10 @@ func buildRequestBody() []byte {
 	}`)
 }
 
-func checkStoresInResponse(response FoodJson) []string {
+func (foodApi FoodApi) checkStoresInResponse(response FoodJson) []string {
 	var stores []string
 
-	storesInFile := readStoresFromFile()
+	storesInFile := foodApi.fileService.ReadStoresFromFile()
 	for _, grouping := range response.Groupings {
 		for _, item := range grouping.DiscoverBucket.Items {
 			if item.ItemsAvailable > 0 && !strings.Contains(storesInFile, item.Store.StoreName) {

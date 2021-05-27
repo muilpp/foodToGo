@@ -129,16 +129,20 @@ type FoodJson struct {
 	EnabledDiscoverExperiments []string `json:"enabled_discover_experiments"`
 }
 
-type FoodApi struct {
+type FoodApi interface {
+	GetStoresWithFood(bearerToken string) []string
+}
+
+type FoodApiImpl struct {
 	foodAuth    *FoodApiAuth
-	fileService *domain.FileService
+	fileService domain.FileService
 }
 
-func NewFoodApi(fs *domain.FileService) *FoodApi {
-	return &FoodApi{NewFoodApiAuth(fs), fs}
+func NewFoodApi(fs domain.FileService) FoodApiImpl {
+	return FoodApiImpl{NewFoodApiAuth(fs), fs}
 }
 
-func (foodApi FoodApi) GetStoresWithFood(bearerToken string) []string {
+func (foodApi FoodApiImpl) GetStoresWithFood(bearerToken string) []string {
 
 	if bearerToken == "" {
 		bearerToken = foodApi.foodAuth.GetAuthBearer()
@@ -202,14 +206,21 @@ func buildRequestBody() []byte {
 	}`)
 }
 
-func (foodApi FoodApi) checkStoresInResponse(response FoodJson) []string {
+func (foodApi FoodApiImpl) checkStoresInResponse(response FoodJson) []string {
 	var stores []string
 
 	storesInFile := foodApi.fileService.ReadStoresFromFile()
 	for _, grouping := range response.Groupings {
 		for _, item := range grouping.DiscoverBucket.Items {
-			if item.ItemsAvailable > 0 && !strings.Contains(storesInFile, item.Store.StoreName) {
-				stores = append(stores, item.Store.StoreName)
+			if item.ItemsAvailable > 0 {
+				storeName := item.Store.StoreName
+				if item.Item.Name != "" {
+					storeName += " - " + item.Item.Name
+				}
+
+				if !strings.Contains(storesInFile, storeName) {
+					stores = append(stores, storeName)
+				}
 			}
 		}
 	}

@@ -11,14 +11,19 @@ import (
 	gomail "gopkg.in/mail.v2"
 )
 
-type NotificationService struct {
+type NotificationService interface {
+	SendMail(message string)
+	SendTelegramMessage(message string)
 }
 
-func NewNotificationService() *NotificationService {
-	return &NotificationService{}
+type NotificationServiceImpl struct {
 }
 
-func (ns NotificationService) SendMail(message string) {
+func NewNotificationService() *NotificationServiceImpl {
+	return &NotificationServiceImpl{}
+}
+
+func (ns NotificationServiceImpl) SendMail(message string) {
 	m := gomail.NewMessage()
 
 	mailFrom := os.Getenv("MAIL_FROM")
@@ -48,7 +53,7 @@ func (ns NotificationService) SendMail(message string) {
 	}
 }
 
-func (ns NotificationService) SendTelegramMessage(message string) {
+func (ns NotificationServiceImpl) SendTelegramMessage(message string) {
 	telegramToken := os.Getenv("TELEGRAM_API_TOKEN")
 	telegramChatId := os.Getenv("TELEGRAM_CHAT_ID")
 

@@ -12,10 +12,10 @@ import (
 )
 
 type FoodApiAuth struct {
-	fileService *domain.FileService
+	fileService domain.FileService
 }
 
-func NewFoodApiAuth(fs *domain.FileService) *FoodApiAuth {
+func NewFoodApiAuth(fs domain.FileService) *FoodApiAuth {
 	return &FoodApiAuth{fs}
 }
 

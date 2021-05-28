@@ -14,7 +14,7 @@ var fileService domain.FileService
 var notificationService domain.NotificationService
 var foodApi api.FoodApi
 
-func main() {
+func init() {
 	err := godotenv.Load(".env")
 
 	if err != nil {
@@ -24,7 +24,9 @@ func main() {
 	fileService = domain.NewFileService()
 	notificationService = domain.NewNotificationService()
 	foodApi = api.NewFoodApi(fileService)
+}
 
+func main() {
 	availableStores := foodApi.GetStoresWithFood()
 
 	if len(availableStores) > 0 {

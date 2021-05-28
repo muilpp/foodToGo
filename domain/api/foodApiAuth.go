@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/marc/get-food-to-go/domain"
+	"github.com/marc/get-food-to-go/resources"
 )
 
 type FoodApiAuth struct {
@@ -50,6 +51,6 @@ func (apiAuth FoodApiAuth) GetAuthBearer() string {
 	var authResponseObject AuthResponse
 	json.Unmarshal(body, &authResponseObject)
 
-	apiAuth.fileService.WriteBearerToFile(authResponseObject.Token)
+	apiAuth.fileService.WriteBearerToFile(resources.BearerFileName, authResponseObject.Token)
 	return authResponseObject.Token
 }

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/marc/get-food-to-go/domain"
+	"github.com/marc/get-food-to-go/resources"
 )
 
 const MAX_TRIES = 1
@@ -130,7 +131,7 @@ type FoodJson struct {
 }
 
 type FoodApi interface {
-	GetStoresWithFood(bearerToken string) []string
+	GetStoresWithFood() []string
 }
 
 type FoodApiImpl struct {
@@ -142,7 +143,9 @@ func NewFoodApi(fs domain.FileService) FoodApiImpl {
 	return FoodApiImpl{NewFoodApiAuth(fs), fs}
 }
 
-func (foodApi FoodApiImpl) GetStoresWithFood(bearerToken string) []string {
+func (foodApi FoodApiImpl) GetStoresWithFood() []string {
+
+	bearerToken := foodApi.fileService.ReadBearerFromFile(resources.BearerFileName)
 
 	if bearerToken == "" {
 		bearerToken = foodApi.foodAuth.GetAuthBearer()
@@ -172,10 +175,11 @@ func (foodApi FoodApiImpl) GetStoresWithFood(bearerToken string) []string {
 	if resp.StatusCode == 401 && currentTries < MAX_TRIES {
 		currentTries++
 		fmt.Println("Unauthorized request, get new bearer")
-		authBearer := foodApi.foodAuth.GetAuthBearer()
-		foodApi.GetStoresWithFood(authBearer)
+		foodApi.foodAuth.GetAuthBearer()
+		return foodApi.GetStoresWithFood()
 	} else if resp.StatusCode != 200 {
 		fmt.Println("Response status: ", resp.StatusCode)
+		return []string{}
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -209,7 +213,8 @@ func buildRequestBody() []byte {
 func (foodApi FoodApiImpl) checkStoresInResponse(response FoodJson) []string {
 	var stores []string
 
-	storesInFile := foodApi.fileService.ReadStoresFromFile()
+	storesInFile := foodApi.fileService.ReadStoresFromFile(resources.StoresFileName)
+
 	for _, grouping := range response.Groupings {
 		for _, item := range grouping.DiscoverBucket.Items {
 			if item.ItemsAvailable > 0 {

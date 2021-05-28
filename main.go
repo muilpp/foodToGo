@@ -7,10 +7,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/marc/get-food-to-go/domain"
 	"github.com/marc/get-food-to-go/domain/api"
+	"github.com/marc/get-food-to-go/resources"
 )
-
-const storesFileName = "resources/availableStores.txt"
-const bearerFileName = "resources/authBearer.txt"
 
 var fileService domain.FileService
 var notificationService domain.NotificationService
@@ -23,15 +21,14 @@ func main() {
 		log.Fatalf("Error loading .env file")
 	}
 
-	fileService = domain.NewFileService(bearerFileName, storesFileName)
+	fileService = domain.NewFileService()
 	notificationService = domain.NewNotificationService()
 	foodApi = api.NewFoodApi(fileService)
 
-	bearerToken := fileService.ReadBearerFromFile()
-	availableStores := foodApi.GetStoresWithFood(bearerToken)
+	availableStores := foodApi.GetStoresWithFood()
 
 	if len(availableStores) > 0 {
-		fileService.WriteStoresToFile(availableStores)
+		fileService.WriteStoresToFile(resources.StoresFileName, availableStores)
 
 		storesString := strings.Join(availableStores, ", ")
 		notificationService.SendMail(storesString)

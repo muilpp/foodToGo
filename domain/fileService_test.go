@@ -20,20 +20,20 @@ func TestMain(m *testing.M) {
 
 func TestBearerIsCorrectlyReadFromFile(t *testing.T) {
 
-	fs := NewFileService(bearerTestFile, "")
+	fs := NewFileService()
 
-	fs.WriteBearerToFile("AABBCC")
-	bearer := fs.ReadBearerFromFile()
+	fs.WriteBearerToFile(bearerTestFile, "AABBCC")
+	bearer := fs.ReadBearerFromFile(bearerTestFile)
 
 	assert.Equal(t, "AABBCC", bearer)
 }
 
 func TestStoresAreCorrectlyReadFromFile(t *testing.T) {
 
-	fs := NewFileService("", storeTestFile)
+	fs := NewFileService()
 
-	fs.WriteStoresToFile([]string{"store1", "store2"})
-	stores := fs.ReadStoresFromFile()
+	fs.WriteStoresToFile(storeTestFile, []string{"store1", "store2"})
+	stores := fs.ReadStoresFromFile(storeTestFile)
 
 	assert.Equal(t, string("store1\nstore2"), stores)
 }

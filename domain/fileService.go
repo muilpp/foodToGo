@@ -8,30 +8,25 @@ import (
 )
 
 type FileService interface {
-	ReadBearerFromFile() string
-	WriteBearerToFile(bearer string)
-	ReadStoresFromFile() string
-	WriteStoresToFile(stores []string)
+	ReadBearerFromFile(bearerFile string) string
+	WriteBearerToFile(bearerFile string, bearer string)
+	ReadStoresFromFile(bearerFile string) string
+	WriteStoresToFile(bearerFile string, stores []string)
 }
 
 type FileServiceImpl struct {
-	StoresFileName string
-	BearerFileName string
 }
 
-func NewFileService(bearerFileName string, storesFileName string) *FileServiceImpl {
-	return &FileServiceImpl{
-		BearerFileName: bearerFileName,
-		StoresFileName: storesFileName,
-	}
+func NewFileService() *FileServiceImpl {
+	return &FileServiceImpl{}
 }
 
-func (fs *FileServiceImpl) ReadBearerFromFile() string {
-	return fs.readFile(fs.BearerFileName)
+func (fs *FileServiceImpl) ReadBearerFromFile(bearerFile string) string {
+	return fs.readFile(bearerFile)
 }
 
-func (fs *FileServiceImpl) WriteBearerToFile(bearer string) {
-	f, err := os.Create(fs.BearerFileName)
+func (fs *FileServiceImpl) WriteBearerToFile(bearerFile string, bearer string) {
+	f, err := os.Create(bearerFile)
 
 	if err != nil {
 		log.Fatal(err)
@@ -46,12 +41,12 @@ func (fs *FileServiceImpl) WriteBearerToFile(bearer string) {
 	}
 }
 
-func (fs *FileServiceImpl) ReadStoresFromFile() string {
-	return fs.readFile(fs.StoresFileName)
+func (fs *FileServiceImpl) ReadStoresFromFile(storeFile string) string {
+	return fs.readFile(storeFile)
 }
 
-func (fs *FileServiceImpl) WriteStoresToFile(stores []string) {
-	f, err := os.OpenFile(fs.StoresFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
+func (fs *FileServiceImpl) WriteStoresToFile(storeFile string, stores []string) {
+	f, err := os.OpenFile(storeFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
 
 	if err != nil {
 		log.Fatal(err)

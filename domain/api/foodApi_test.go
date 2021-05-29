@@ -9,7 +9,7 @@ import (
 )
 
 func TestCheckStoresInResponse(t *testing.T) {
-	response := []byte("{\"groupings\": [{\"discover_bucket\": {\"items\": [{\"store\": {\"store_name\": \"Fruiteria\"},\"items_available\": 0}, {\"store\": {\"store_name\": \"Carnisseria\"},\"items_available\": 2}, {\"store\": {\"store_name\": \"Pastisseria\"},\"items_available\": 1}]}}]}")
+	response := []byte("{\"groupings\": [{\"discover_bucket\": {\"items\": [{\"item\":{\"name\":\"cárnico\"},\"store\":{\"store_id\":\"47816s\",\"store_name\":\"Fruiteria\"},\"items_available\":0}, {\"store\": {\"store_name\": \"Carnisseria\"},\"items_available\": 2}, {\"store\": {\"store_name\": \"Pastisseria\"},\"items_available\": 1}]}}]}")
 	responseStruct := parseJsonResponse(response)
 
 	assert.Equal(t, 1, len(responseStruct.Groupings))
@@ -90,7 +90,7 @@ func TestAllStoresAddedIfNoStoresInFile(t *testing.T) {
 	assert.Equal(t, "Fish shop", stores[2], "Fish shop expected, but found "+stores[2])
 }
 
-func TestOnlyStoresWithItemsAvailableSaved(t *testing.T) {
+func TestOnlyStoresWithItemsAvailableAdded(t *testing.T) {
 	response := []byte("{\"groupings\": [{\"discover_bucket\": {\"items\": [{\"store\": {\"store_name\": \"Meat shop\"},\"items_available\": 1}, {\"store\": {\"store_name\": \"Bakery\"},\"items_available\": 0}, {\"store\": {\"store_name\": \"Fish shop\"},\"items_available\": 0}]}}]}")
 	responseStruct := parseJsonResponse(response)
 
@@ -105,4 +105,23 @@ func TestOnlyStoresWithItemsAvailableSaved(t *testing.T) {
 
 	assert.Equal(t, 1, len(stores), "1 shop expected, but "+strconv.Itoa(len(stores))+" found")
 	assert.Equal(t, "Meat shop", stores[0], "Meat shop expected, but found "+stores[0])
+}
+
+func TestStoresNameContainsItemName(t *testing.T) {
+	response := []byte("{\"groupings\": [{\"discover_bucket\": {\"items\": [{\"item\":{\"name\":\"Meat\"},\"store\":{\"store_id\":\"47816s\",\"store_name\":\"Shop\"},\"items_available\":1}, {\"item\":{\"name\":\"Bread\"},\"store\": {\"store_name\": \"Bakery\"},\"items_available\": 2}, {\"item\":{\"name\":\"Fish\"},\"store\": {\"store_name\": \"Shop\"},\"items_available\": 1}]}}]}")
+	responseStruct := parseJsonResponse(response)
+
+	fs := newFileServiceMock()
+	fs.ReadStoresFromFileMock = func(bearerFile string) string {
+		return ""
+	}
+
+	foodApi := NewFoodApi(fs)
+
+	stores := foodApi.checkStoresInResponse(responseStruct)
+
+	assert.Equal(t, 3, len(stores), "3 shop expected, but "+strconv.Itoa(len(stores))+" found")
+	assert.Equal(t, "Shop - Meat", stores[0], "Shop - Meat expected, but found "+stores[0])
+	assert.Equal(t, "Bakery - Bread", stores[1], "Bakery - Bread expected, but found "+stores[1])
+	assert.Equal(t, "Shop - Fish", stores[2], "Shop - Fish expected, but found "+stores[2])
 }

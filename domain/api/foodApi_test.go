@@ -65,7 +65,7 @@ func TestStoresNotAddedIfAlreadyPresentInFile(t *testing.T) {
 	responseStruct := parseJsonResponse(response)
 
 	fs := newFileServiceMock("", "")
-	foodApi := NewFoodApi(fs)
+	foodApi := NewFoodApi(fs, "", "", "")
 
 	stores := foodApi.checkStoresInResponse(responseStruct)
 
@@ -83,7 +83,7 @@ func TestAllStoresAddedIfNoStoresInFile(t *testing.T) {
 		return ""
 	}
 
-	foodApi := NewFoodApi(fs)
+	foodApi := NewFoodApi(fs, "", "", "")
 
 	stores := foodApi.checkStoresInResponse(responseStruct)
 
@@ -102,7 +102,7 @@ func TestOnlyStoresWithItemsAvailableAdded(t *testing.T) {
 		return ""
 	}
 
-	foodApi := NewFoodApi(fs)
+	foodApi := NewFoodApi(fs, "", "", "")
 
 	stores := foodApi.checkStoresInResponse(responseStruct)
 
@@ -119,7 +119,7 @@ func TestStoresNameContainsItemName(t *testing.T) {
 		return ""
 	}
 
-	foodApi := NewFoodApi(fs)
+	foodApi := NewFoodApi(fs, "", "", "")
 
 	stores := foodApi.checkStoresInResponse(responseStruct)
 
@@ -127,4 +127,12 @@ func TestStoresNameContainsItemName(t *testing.T) {
 	assert.Equal(t, "Shop - Meat", stores[0], "Shop - Meat expected, but found "+stores[0])
 	assert.Equal(t, "Bakery - Bread", stores[1], "Bakery - Bread expected, but found "+stores[1])
 	assert.Equal(t, "Shop - Fish", stores[2], "Shop - Fish expected, but found "+stores[2])
+}
+
+func TestBuildRequestIsCorrectlyBuilt(t *testing.T) {
+	fs := newFileServiceMock("", "")
+	foodApi := NewFoodApi(fs, "123", "10", "20")
+	bodyRequest := foodApi.buildRequestBody()
+
+	assert.Equal(t, "{\n\t\t\"user_id\": \"123\",\n\t\t\"bucket_identifiers\": [\"Favorites\"],\n\t\t\"origin\": {\n\t\t\t\"latitude\":10,\n\t\t\t\"longitude\":20\n\t\t},\n\t\t\"radius\": 5.0,\n\t\t\"discover_experiments\": [\"WEIGHTED_ITEMS\"]\n\t}", string(bodyRequest), "Body request expected: "+""+", but found: ", string(bodyRequest))
 }

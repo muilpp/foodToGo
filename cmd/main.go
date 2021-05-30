@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -23,7 +24,7 @@ func init() {
 
 	fileService = domain.NewFilePersistorService(resources.BearerFileName, resources.StoresFileName)
 	notificationService = domain.NewNotificationService()
-	foodApi = api.NewFoodApi(fileService)
+	foodApi = api.NewFoodApi(fileService, os.Getenv("APP_USER_ID"), os.Getenv("LATITUDE"), os.Getenv("LONGITUDE"))
 }
 
 func main() {

@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -136,10 +135,19 @@ type FoodApi interface {
 type FoodApiImpl struct {
 	foodAuth    *FoodApiAuth
 	fileService domain.PersistorService
+	userId      string
+	latitude    string
+	longitude   string
 }
 
-func NewFoodApi(fs domain.PersistorService) FoodApiImpl {
-	return FoodApiImpl{NewFoodApiAuth(fs), fs}
+func NewFoodApi(fs domain.PersistorService, userId string, latitude string, longitude string) FoodApiImpl {
+	return FoodApiImpl{
+		foodAuth:    NewFoodApiAuth(fs),
+		fileService: fs,
+		userId:      userId,
+		latitude:    latitude,
+		longitude:   longitude,
+	}
 }
 
 func (foodApi FoodApiImpl) GetStoresWithFood() []string {
@@ -151,7 +159,7 @@ func (foodApi FoodApiImpl) GetStoresWithFood() []string {
 		fmt.Println("Current bearer empty, getting a new one")
 	}
 
-	requestBody := buildRequestBody()
+	requestBody := foodApi.buildRequestBody()
 	req, err := http.NewRequest("POST", "https://apptoogoodtogo.com/api/item/v7/discover", bytes.NewBuffer(requestBody))
 	if err != nil {
 		panic(err)
@@ -192,17 +200,14 @@ func (foodApi FoodApiImpl) GetStoresWithFood() []string {
 	return foodApi.checkStoresInResponse(responseStruct)
 }
 
-func buildRequestBody() []byte {
-	userId := os.Getenv("APP_USER_ID")
-	latitude := os.Getenv("LATITUDE")
-	longitude := os.Getenv("LONGITUDE")
+func (foodApi FoodApiImpl) buildRequestBody() []byte {
 
 	return []byte(`{
-		"user_id": "` + userId + `",
+		"user_id": "` + foodApi.userId + `",
 		"bucket_identifiers": ["Favorites"],
 		"origin": {
-			"latitude":` + latitude + `,
-			"longitude":` + longitude + `
+			"latitude":` + foodApi.latitude + `,
+			"longitude":` + foodApi.longitude + `
 		},
 		"radius": 5.0,
 		"discover_experiments": ["WEIGHTED_ITEMS"]

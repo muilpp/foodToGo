@@ -7,26 +7,28 @@ import (
 	"os"
 )
 
-type FileService interface {
-	ReadBearerFromFile(bearerFile string) string
-	WriteBearerToFile(bearerFile string, bearer string)
-	ReadStoresFromFile(bearerFile string) string
-	WriteStoresToFile(bearerFile string, stores []string)
+type PersistorService interface {
+	ReadBearer() string
+	WriteBearer(bearer string)
+	ReadStores() string
+	WriteStores(stores []string)
 }
 
-type FileServiceImpl struct {
+type FilePersistor struct {
+	bearerFileName string
+	storesFileName string
 }
 
-func NewFileService() *FileServiceImpl {
-	return &FileServiceImpl{}
+func NewFilePersistorService(bearerFileName string, storesFileName string) *FilePersistor {
+	return &FilePersistor{bearerFileName: bearerFileName, storesFileName: storesFileName}
 }
 
-func (fs *FileServiceImpl) ReadBearerFromFile(bearerFile string) string {
-	return fs.readFile(bearerFile)
+func (fs *FilePersistor) ReadBearer() string {
+	return fs.readFile(fs.bearerFileName)
 }
 
-func (fs *FileServiceImpl) WriteBearerToFile(bearerFile string, bearer string) {
-	f, err := os.Create(bearerFile)
+func (fs *FilePersistor) WriteBearer(bearer string) {
+	f, err := os.Create(fs.bearerFileName)
 
 	if err != nil {
 		log.Fatal(err)
@@ -41,12 +43,12 @@ func (fs *FileServiceImpl) WriteBearerToFile(bearerFile string, bearer string) {
 	}
 }
 
-func (fs *FileServiceImpl) ReadStoresFromFile(storeFile string) string {
-	return fs.readFile(storeFile)
+func (fs *FilePersistor) ReadStores() string {
+	return fs.readFile(fs.storesFileName)
 }
 
-func (fs *FileServiceImpl) WriteStoresToFile(storeFile string, stores []string) {
-	f, err := os.OpenFile(storeFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
+func (fs *FilePersistor) WriteStores(stores []string) {
+	f, err := os.OpenFile(fs.storesFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
 
 	if err != nil {
 		log.Fatal(err)
@@ -63,7 +65,7 @@ func (fs *FileServiceImpl) WriteStoresToFile(storeFile string, stores []string) 
 	}
 }
 
-func (fs *FileServiceImpl) readFile(fileName string) string {
+func (fs *FilePersistor) readFile(fileName string) string {
 	content, err := ioutil.ReadFile(fileName)
 
 	if err != nil {

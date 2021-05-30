@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/marc/get-food-to-go/domain"
-	"github.com/marc/get-food-to-go/resources"
 )
 
 const MAX_TRIES = 1
@@ -136,16 +135,16 @@ type FoodApi interface {
 
 type FoodApiImpl struct {
 	foodAuth    *FoodApiAuth
-	fileService domain.FileService
+	fileService domain.PersistorService
 }
 
-func NewFoodApi(fs domain.FileService) FoodApiImpl {
+func NewFoodApi(fs domain.PersistorService) FoodApiImpl {
 	return FoodApiImpl{NewFoodApiAuth(fs), fs}
 }
 
 func (foodApi FoodApiImpl) GetStoresWithFood() []string {
 
-	bearerToken := foodApi.fileService.ReadBearerFromFile(resources.BearerFileName)
+	bearerToken := foodApi.fileService.ReadBearer()
 
 	if bearerToken == "" {
 		bearerToken = foodApi.foodAuth.GetAuthBearer()
@@ -213,7 +212,7 @@ func buildRequestBody() []byte {
 func (foodApi FoodApiImpl) checkStoresInResponse(response FoodJson) []string {
 	var stores []string
 
-	storesInFile := foodApi.fileService.ReadStoresFromFile(resources.StoresFileName)
+	storesInFile := foodApi.fileService.ReadStores()
 
 	for _, grouping := range response.Groupings {
 		for _, item := range grouping.DiscoverBucket.Items {

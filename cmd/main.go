@@ -10,7 +10,7 @@ import (
 	"github.com/marc/get-food-to-go/resources"
 )
 
-var fileService domain.FileService
+var fileService domain.PersistorService
 var notificationService domain.NotificationService
 var foodApi api.FoodApi
 
@@ -21,7 +21,7 @@ func init() {
 		log.Fatalf("Error loading .env file")
 	}
 
-	fileService = domain.NewFileService()
+	fileService = domain.NewFilePersistorService(resources.BearerFileName, resources.StoresFileName)
 	notificationService = domain.NewNotificationService()
 	foodApi = api.NewFoodApi(fileService)
 }
@@ -30,7 +30,7 @@ func main() {
 	availableStores := foodApi.GetStoresWithFood()
 
 	if len(availableStores) > 0 {
-		fileService.WriteStoresToFile(resources.StoresFileName, availableStores)
+		fileService.WriteStores(availableStores)
 
 		storesString := strings.Join(availableStores, ", ")
 		notificationService.SendMail(storesString)

@@ -11,7 +11,10 @@ import (
 const storeTestFile = "storeTestFile.txt"
 const bearerTestFile = "bearerTestFile.txt"
 
+var fileService PersistorService
+
 func TestMain(m *testing.M) {
+	fileService = NewFilePersistorService(bearerTestFile, storeTestFile)
 	exitVal := m.Run()
 	cleanup(bearerTestFile)
 	cleanup(storeTestFile)
@@ -19,21 +22,15 @@ func TestMain(m *testing.M) {
 }
 
 func TestBearerIsCorrectlyReadFromFile(t *testing.T) {
-
-	fs := NewFileService()
-
-	fs.WriteBearerToFile(bearerTestFile, "AABBCC")
-	bearer := fs.ReadBearerFromFile(bearerTestFile)
+	fileService.WriteBearer("AABBCC")
+	bearer := fileService.ReadBearer()
 
 	assert.Equal(t, "AABBCC", bearer)
 }
 
 func TestStoresAreCorrectlyReadFromFile(t *testing.T) {
-
-	fs := NewFileService()
-
-	fs.WriteStoresToFile(storeTestFile, []string{"store1", "store2"})
-	stores := fs.ReadStoresFromFile(storeTestFile)
+	fileService.WriteStores([]string{"store1", "store2"})
+	stores := fileService.ReadStores()
 
 	assert.Equal(t, string("store1\nstore2"), stores)
 }

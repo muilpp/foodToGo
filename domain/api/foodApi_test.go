@@ -34,34 +34,37 @@ func parseJsonResponse(response []byte) FoodJson {
 }
 
 type fileServiceMock struct {
-	ReadStoresFromFileMock func(bearerFile string) string
+	bearerFile             string
+	storeFile              string
+	ReadStoresFromFileMock func() string
 }
 
-func newFileServiceMock() fileServiceMock {
+func newFileServiceMock(bearerFile string, storeFile string) fileServiceMock {
 	return fileServiceMock{
-		ReadStoresFromFileMock: func(bearerFile string) string { return "Meat shop" },
+		bearerFile:             bearerFile,
+		storeFile:              storeFile,
+		ReadStoresFromFileMock: func() string { return "Meat shop" },
 	}
 }
 
-func (fs fileServiceMock) ReadBearerFromFile(bearerFile string) string {
+func (fs fileServiceMock) ReadBearer() string {
 	return ""
 }
 
-func (fs fileServiceMock) ReadStoresFromFile(bearerFile string) string {
-	return fs.ReadStoresFromFileMock(bearerFile)
+func (fs fileServiceMock) ReadStores() string {
+	return fs.ReadStoresFromFileMock()
 }
 
-func (fs fileServiceMock) WriteBearerToFile(bearerFile string, bearer string) {}
+func (fs fileServiceMock) WriteBearer(bearer string) {}
 
-func (fs fileServiceMock) WriteStoresToFile(bearerFile string, stores []string) {
+func (fs fileServiceMock) WriteStores(stores []string) {
 }
 
 func TestStoresNotAddedIfAlreadyPresentInFile(t *testing.T) {
 	response := []byte("{\"groupings\": [{\"discover_bucket\": {\"items\": [{\"store\": {\"store_name\": \"Meat shop\"},\"items_available\": 1}, {\"store\": {\"store_name\": \"Bakery\"},\"items_available\": 2}, {\"store\": {\"store_name\": \"Fish shop\"},\"items_available\": 1}]}}]}")
 	responseStruct := parseJsonResponse(response)
 
-	fs := newFileServiceMock()
-
+	fs := newFileServiceMock("", "")
 	foodApi := NewFoodApi(fs)
 
 	stores := foodApi.checkStoresInResponse(responseStruct)
@@ -75,8 +78,8 @@ func TestAllStoresAddedIfNoStoresInFile(t *testing.T) {
 	response := []byte("{\"groupings\": [{\"discover_bucket\": {\"items\": [{\"store\": {\"store_name\": \"Meat shop\"},\"items_available\": 1}, {\"store\": {\"store_name\": \"Bakery\"},\"items_available\": 2}, {\"store\": {\"store_name\": \"Fish shop\"},\"items_available\": 1}]}}]}")
 	responseStruct := parseJsonResponse(response)
 
-	fs := newFileServiceMock()
-	fs.ReadStoresFromFileMock = func(bearerFile string) string {
+	fs := newFileServiceMock("", "")
+	fs.ReadStoresFromFileMock = func() string {
 		return ""
 	}
 
@@ -94,8 +97,8 @@ func TestOnlyStoresWithItemsAvailableAdded(t *testing.T) {
 	response := []byte("{\"groupings\": [{\"discover_bucket\": {\"items\": [{\"store\": {\"store_name\": \"Meat shop\"},\"items_available\": 1}, {\"store\": {\"store_name\": \"Bakery\"},\"items_available\": 0}, {\"store\": {\"store_name\": \"Fish shop\"},\"items_available\": 0}]}}]}")
 	responseStruct := parseJsonResponse(response)
 
-	fs := newFileServiceMock()
-	fs.ReadStoresFromFileMock = func(bearerFile string) string {
+	fs := newFileServiceMock("", "")
+	fs.ReadStoresFromFileMock = func() string {
 		return ""
 	}
 
@@ -111,8 +114,8 @@ func TestStoresNameContainsItemName(t *testing.T) {
 	response := []byte("{\"groupings\": [{\"discover_bucket\": {\"items\": [{\"item\":{\"name\":\"Meat\"},\"store\":{\"store_id\":\"47816s\",\"store_name\":\"Shop\"},\"items_available\":1}, {\"item\":{\"name\":\"Bread\"},\"store\": {\"store_name\": \"Bakery\"},\"items_available\": 2}, {\"item\":{\"name\":\"Fish\"},\"store\": {\"store_name\": \"Shop\"},\"items_available\": 1}]}}]}")
 	responseStruct := parseJsonResponse(response)
 
-	fs := newFileServiceMock()
-	fs.ReadStoresFromFileMock = func(bearerFile string) string {
+	fs := newFileServiceMock("", "")
+	fs.ReadStoresFromFileMock = func() string {
 		return ""
 	}
 

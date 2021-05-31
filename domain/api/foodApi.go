@@ -134,16 +134,16 @@ type FoodApi interface {
 }
 
 type FoodApiImpl struct {
-	foodAuth    *FoodApiAuth
+	foodAuth    FoodApiAuth
 	fileService domain.PersistorService
 	userId      string
 	latitude    string
 	longitude   string
 }
 
-func NewFoodApi(fs domain.PersistorService, userId string, latitude string, longitude string) FoodApiImpl {
+func NewFoodApi(authService FoodApiAuth, fs domain.PersistorService, userId string, latitude string, longitude string) FoodApiImpl {
 	return FoodApiImpl{
-		foodAuth:    NewFoodApiAuth(fs),
+		foodAuth:    authService,
 		fileService: fs,
 		userId:      userId,
 		latitude:    latitude,

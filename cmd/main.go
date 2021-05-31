@@ -12,6 +12,7 @@ import (
 )
 
 var fileService domain.PersistorService
+var authService api.FoodApiAuth
 var notificationService domain.NotificationService
 var foodApi api.FoodApi
 
@@ -23,8 +24,9 @@ func init() {
 	}
 
 	fileService = domain.NewFilePersistorService(resources.BearerFileName, resources.StoresFileName)
+	authService = api.NewFoodApiAuth(fileService)
 	notificationService = domain.NewNotificationService()
-	foodApi = api.NewFoodApi(fileService, os.Getenv("APP_USER_ID"), os.Getenv("LATITUDE"), os.Getenv("LONGITUDE"))
+	foodApi = api.NewFoodApi(authService, fileService, os.Getenv("APP_USER_ID"), os.Getenv("LATITUDE"), os.Getenv("LONGITUDE"))
 }
 
 func main() {

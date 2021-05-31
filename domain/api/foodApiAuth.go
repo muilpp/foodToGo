@@ -11,19 +11,23 @@ import (
 	"github.com/marc/get-food-to-go/domain"
 )
 
-type FoodApiAuth struct {
+type FoodApiAuth interface {
+	GetAuthBearer() string
+}
+
+type FoodApiAuthImpl struct {
 	fileService domain.PersistorService
 }
 
-func NewFoodApiAuth(fs domain.PersistorService) *FoodApiAuth {
-	return &FoodApiAuth{fs}
+func NewFoodApiAuth(fs domain.PersistorService) FoodApiAuthImpl {
+	return FoodApiAuthImpl{fs}
 }
 
 type AuthResponse struct {
 	Token string `json:"access_token"`
 }
 
-func (apiAuth FoodApiAuth) GetAuthBearer() string {
+func (apiAuth FoodApiAuthImpl) GetAuthBearer() string {
 	json_data := apiAuth.buildAuthRequestBody(os.Getenv("API_USER"), os.Getenv("API_PASSWORD"))
 	resp, err := http.Post("https://apptoogoodtogo.com/api/auth/v2/loginByEmail", "application/json",
 		bytes.NewBuffer(json_data))
@@ -45,7 +49,7 @@ func (apiAuth FoodApiAuth) GetAuthBearer() string {
 	return authResponseObject.Token
 }
 
-func (apiAuth FoodApiAuth) buildAuthRequestBody(mail string, password string) []byte {
+func (apiAuth FoodApiAuthImpl) buildAuthRequestBody(mail string, password string) []byte {
 	values := map[string]string{"device_type": "ANDROID", "email": mail, "password": password}
 	json_data, err := json.Marshal(values)
 

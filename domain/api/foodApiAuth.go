@@ -24,16 +24,7 @@ type AuthResponse struct {
 }
 
 func (apiAuth FoodApiAuth) GetAuthBearer() string {
-	mail := os.Getenv("API_USER")
-	password := os.Getenv("API_PASSWORD")
-
-	values := map[string]string{"device_type": "ANDROID", "email": mail, "password": password}
-	json_data, err := json.Marshal(values)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	json_data := apiAuth.buildAuthRequestBody(os.Getenv("API_USER"), os.Getenv("API_PASSWORD"))
 	resp, err := http.Post("https://apptoogoodtogo.com/api/auth/v2/loginByEmail", "application/json",
 		bytes.NewBuffer(json_data))
 
@@ -52,4 +43,15 @@ func (apiAuth FoodApiAuth) GetAuthBearer() string {
 
 	apiAuth.fileService.WriteBearer(authResponseObject.Token)
 	return authResponseObject.Token
+}
+
+func (apiAuth FoodApiAuth) buildAuthRequestBody(mail string, password string) []byte {
+	values := map[string]string{"device_type": "ANDROID", "email": mail, "password": password}
+	json_data, err := json.Marshal(values)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return json_data
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -160,6 +161,39 @@ func (foodApi FoodApiImpl) GetStoresWithFood() []string {
 	}
 
 	requestBody := foodApi.buildRequestBody()
+	resp := foodApi.requestFood(requestBody, bearerToken)
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 401 && currentTries < MAX_TRIES {
+		currentTries++
+		fmt.Println("Unauthorized request, get new bearer")
+		foodApi.foodAuth.GetAuthBearer()
+		return foodApi.GetStoresWithFood()
+	} else if resp.StatusCode != 200 {
+		fmt.Println("Response status: ", resp.StatusCode)
+		return []string{}
+	}
+
+	response := foodApi.parseResponse(resp.Body)
+	return foodApi.checkStoresInResponse(response)
+}
+
+func (foodApi FoodApiImpl) buildRequestBody() []byte {
+
+	return []byte(`{
+		"user_id": "` + foodApi.userId + `",
+		"bucket_identifiers": ["Favorites"],
+		"origin": {
+			"latitude":` + foodApi.latitude + `,
+			"longitude":` + foodApi.longitude + `
+		},
+		"radius": 5.0,
+		"discover_experiments": ["WEIGHTED_ITEMS"]
+	}`)
+}
+
+func (foodApi FoodApiImpl) requestFood(requestBody []byte, bearerToken string) *http.Response {
 	req, err := http.NewRequest("POST", "https://apptoogoodtogo.com/api/item/v7/discover", bytes.NewBuffer(requestBody))
 	if err != nil {
 		panic(err)
@@ -177,19 +211,11 @@ func (foodApi FoodApiImpl) GetStoresWithFood() []string {
 		log.Fatalf("An Error Occured %v", err)
 	}
 
-	defer resp.Body.Close()
+	return resp
+}
 
-	if resp.StatusCode == 401 && currentTries < MAX_TRIES {
-		currentTries++
-		fmt.Println("Unauthorized request, get new bearer")
-		foodApi.foodAuth.GetAuthBearer()
-		return foodApi.GetStoresWithFood()
-	} else if resp.StatusCode != 200 {
-		fmt.Println("Response status: ", resp.StatusCode)
-		return []string{}
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
+func (foodApi FoodApiImpl) parseResponse(responseBody io.ReadCloser) FoodJson {
+	body, err := ioutil.ReadAll(responseBody)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -197,21 +223,7 @@ func (foodApi FoodApiImpl) GetStoresWithFood() []string {
 	var responseStruct FoodJson
 	json.Unmarshal(body, &responseStruct)
 
-	return foodApi.checkStoresInResponse(responseStruct)
-}
-
-func (foodApi FoodApiImpl) buildRequestBody() []byte {
-
-	return []byte(`{
-		"user_id": "` + foodApi.userId + `",
-		"bucket_identifiers": ["Favorites"],
-		"origin": {
-			"latitude":` + foodApi.latitude + `,
-			"longitude":` + foodApi.longitude + `
-		},
-		"radius": 5.0,
-		"discover_experiments": ["WEIGHTED_ITEMS"]
-	}`)
+	return responseStruct
 }
 
 func (foodApi FoodApiImpl) checkStoresInResponse(response FoodJson) []string {

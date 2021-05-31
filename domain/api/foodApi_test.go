@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/marc/get-food-to-go/domain"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -65,7 +66,7 @@ func TestStoresNotAddedIfAlreadyPresentInFile(t *testing.T) {
 	responseStruct := parseJsonResponse(response)
 
 	fs := newFileServiceMock("", "")
-	foodApi := NewFoodApi(fs, "", "", "")
+	foodApi := NewFoodApi(NewFoodApiAuth(fs), fs, "", "", "")
 
 	stores := foodApi.checkStoresInResponse(responseStruct)
 
@@ -83,7 +84,7 @@ func TestAllStoresAddedIfNoStoresInFile(t *testing.T) {
 		return ""
 	}
 
-	foodApi := NewFoodApi(fs, "", "", "")
+	foodApi := NewFoodApi(NewFoodApiAuth(fs), fs, "", "", "")
 
 	stores := foodApi.checkStoresInResponse(responseStruct)
 
@@ -102,7 +103,7 @@ func TestOnlyStoresWithItemsAvailableAdded(t *testing.T) {
 		return ""
 	}
 
-	foodApi := NewFoodApi(fs, "", "", "")
+	foodApi := NewFoodApi(NewFoodApiAuth(fs), fs, "", "", "")
 
 	stores := foodApi.checkStoresInResponse(responseStruct)
 
@@ -119,7 +120,7 @@ func TestStoresNameContainsItemName(t *testing.T) {
 		return ""
 	}
 
-	foodApi := NewFoodApi(fs, "", "", "")
+	foodApi := NewFoodApi(NewFoodApiAuth(fs), fs, "", "", "")
 
 	stores := foodApi.checkStoresInResponse(responseStruct)
 
@@ -131,8 +132,29 @@ func TestStoresNameContainsItemName(t *testing.T) {
 
 func TestBuildRequestIsCorrectlyBuilt(t *testing.T) {
 	fs := newFileServiceMock("", "")
-	foodApi := NewFoodApi(fs, "123", "10", "20")
+	foodApi := NewFoodApi(NewFoodApiAuth(fs), fs, "123", "10", "20")
 	bodyRequest := foodApi.buildRequestBody()
 
 	assert.Equal(t, "{\n\t\t\"user_id\": \"123\",\n\t\t\"bucket_identifiers\": [\"Favorites\"],\n\t\t\"origin\": {\n\t\t\t\"latitude\":10,\n\t\t\t\"longitude\":20\n\t\t},\n\t\t\"radius\": 5.0,\n\t\t\"discover_experiments\": [\"WEIGHTED_ITEMS\"]\n\t}", string(bodyRequest), "Body request expected: "+""+", but found: ", string(bodyRequest))
+}
+
+type foodAuthMock struct {
+	fileService domain.PersistorService
+}
+
+func newFoodAuthMock(fileService domain.PersistorService) *foodAuthMock {
+	return &foodAuthMock{fileService}
+}
+
+func (authMock foodAuthMock) GetAuthBearer() string {
+	return "bearerMock"
+}
+
+func TestNoStoresFoundWhenAuthBearerIsIncorrect(t *testing.T) {
+
+	fileServiceMock := newFileServiceMock("", "")
+	foodApi := NewFoodApi(newFoodAuthMock(fileServiceMock), fileServiceMock, "userId", "latitude", "longitude")
+	stores := foodApi.GetStoresWithFood()
+
+	assert.Equal(t, 0, len(stores))
 }

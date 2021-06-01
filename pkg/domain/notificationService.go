@@ -2,12 +2,12 @@ package domain
 
 import (
 	"crypto/tls"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 
+	"go.uber.org/zap"
 	gomail "gopkg.in/mail.v2"
 )
 
@@ -48,8 +48,7 @@ func (ns NotificationServiceImpl) SendMail(message string) {
 	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
 	if err := d.DialAndSend(m); err != nil {
-		fmt.Println(err)
-		panic(err)
+		zap.L().Error("Could not send mail", zap.Error(err))
 	}
 }
 

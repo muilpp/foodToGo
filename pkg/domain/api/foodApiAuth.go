@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/marc/get-food-to-go/pkg/domain"
+	"go.uber.org/zap"
 )
 
 type FoodApiAuth interface {
@@ -33,7 +34,7 @@ func (apiAuth FoodApiAuthImpl) GetAuthBearer() string {
 		bytes.NewBuffer(json_data))
 
 	if err != nil {
-		log.Fatalf("An Error Occured %v", err)
+		zap.L().Error("Error getting bearer", zap.Error(err))
 	}
 
 	defer resp.Body.Close()
@@ -54,7 +55,7 @@ func (apiAuth FoodApiAuthImpl) buildAuthRequestBody(mail string, password string
 	json_data, err := json.Marshal(values)
 
 	if err != nil {
-		log.Fatal(err)
+		zap.L().Fatal("Could not marshall auth body", zap.Error(err))
 	}
 
 	return json_data

@@ -3,7 +3,6 @@ package api
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -12,6 +11,7 @@ import (
 	"time"
 
 	"github.com/marc/get-food-to-go/pkg/domain"
+	"go.uber.org/zap"
 )
 
 const MAX_TRIES = 1
@@ -157,7 +157,7 @@ func (foodApi FoodApiImpl) GetStoresWithFood() []string {
 
 	if bearerToken == "" {
 		bearerToken = foodApi.foodAuth.GetAuthBearer()
-		fmt.Println("Current bearer empty, getting a new one")
+		zap.L().Info("Current bearer empty, getting a new one")
 	}
 
 	requestBody := foodApi.buildRequestBody()
@@ -167,11 +167,11 @@ func (foodApi FoodApiImpl) GetStoresWithFood() []string {
 
 	if resp.StatusCode == 401 && currentTries < MAX_TRIES {
 		currentTries++
-		fmt.Println("Unauthorized request, get new bearer")
+		zap.L().Info("Unauthorized request, get new bearer")
 		foodApi.foodAuth.GetAuthBearer()
 		return foodApi.GetStoresWithFood()
 	} else if resp.StatusCode != 200 {
-		fmt.Println("Response status: ", resp.StatusCode)
+		zap.L().Error("Bad response while getting stores: ", zap.Int("status: ", resp.StatusCode), zap.Any("body", resp.Body))
 		return []string{}
 	}
 
@@ -208,7 +208,7 @@ func (foodApi FoodApiImpl) requestFood(requestBody []byte, bearerToken string) *
 	resp, err := client.Do(req)
 
 	if err != nil {
-		log.Fatalf("An Error Occured %v", err)
+		zap.L().Fatal("Error requesting stores: ", zap.Error(err))
 	}
 
 	return resp

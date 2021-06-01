@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/marc/get-food-to-go/domain"
+	"github.com/marc/get-food-to-go/pkg/domain"
 	"github.com/stretchr/testify/assert"
 )
 

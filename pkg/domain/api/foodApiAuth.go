@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/marc/get-food-to-go/domain"
+	"github.com/marc/get-food-to-go/pkg/domain"
 )
 
 type FoodApiAuth interface {

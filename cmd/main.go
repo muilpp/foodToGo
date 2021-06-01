@@ -6,15 +6,17 @@ import (
 	"strings"
 
 	"github.com/joho/godotenv"
-	"github.com/marc/get-food-to-go/domain"
-	"github.com/marc/get-food-to-go/domain/api"
-	"github.com/marc/get-food-to-go/resources"
+	"github.com/marc/get-food-to-go/pkg/domain"
+	"github.com/marc/get-food-to-go/pkg/domain/api"
 )
 
 var fileService domain.PersistorService
 var authService api.FoodApiAuth
 var notificationService domain.NotificationService
 var foodApi api.FoodApi
+
+const STORES_FILE_NAME = "pkg/resources/availableStores.txt"
+const BEARER_FILE_NAME = "pkg/resources/authBearer.txt"
 
 func init() {
 	err := godotenv.Load(".env")
@@ -23,7 +25,7 @@ func init() {
 		log.Fatalf("Error loading .env file")
 	}
 
-	fileService = domain.NewFilePersistorService(resources.BearerFileName, resources.StoresFileName)
+	fileService = domain.NewFilePersistorService(BEARER_FILE_NAME, STORES_FILE_NAME)
 	authService = api.NewFoodApiAuth(fileService)
 	notificationService = domain.NewNotificationService()
 	foodApi = api.NewFoodApi(authService, fileService, os.Getenv("APP_USER_ID"), os.Getenv("LATITUDE"), os.Getenv("LONGITUDE"))

@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/marc/get-food-to-go/domain"
+	"github.com/marc/get-food-to-go/pkg/domain"
 )
 
 const MAX_TRIES = 1

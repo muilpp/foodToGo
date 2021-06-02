@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/marc/get-food-to-go/pkg/domain"
+	"github.com/marc/get-food-to-go/pkg/domain/ports"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,8 +24,8 @@ func TestCheckStoresInResponse(t *testing.T) {
 	assert.Equal(t, 1, responseStruct.Groupings[0].DiscoverBucket.Items[2].ItemsAvailable, "Pastisseria should have 1 item")
 }
 
-func parseJsonResponse(response []byte) FoodJson {
-	var responseStruct FoodJson
+func parseJsonResponse(response []byte) domain.FoodJson {
+	var responseStruct domain.FoodJson
 	err := json.Unmarshal(response, &responseStruct)
 
 	if err != nil {
@@ -37,28 +38,28 @@ func parseJsonResponse(response []byte) FoodJson {
 type fileServiceMock struct {
 	bearerFile             string
 	storeFile              string
-	ReadStoresFromFileMock func() string
+	ReadStoresFromFileMock func() []domain.Store
 }
 
 func newFileServiceMock(bearerFile string, storeFile string) fileServiceMock {
 	return fileServiceMock{
 		bearerFile:             bearerFile,
 		storeFile:              storeFile,
-		ReadStoresFromFileMock: func() string { return "Meat shop" },
+		ReadStoresFromFileMock: func() []domain.Store { return []domain.Store{*domain.NewStore("Meat shop", "ES", 1)} },
 	}
 }
 
-func (fs fileServiceMock) ReadBearer() string {
+func (fs fileServiceMock) GetBearer() string {
 	return ""
 }
 
-func (fs fileServiceMock) ReadStores() string {
+func (fs fileServiceMock) GetStores() []domain.Store {
 	return fs.ReadStoresFromFileMock()
 }
 
-func (fs fileServiceMock) WriteBearer(bearer string) {}
+func (fs fileServiceMock) UpdateBearer(bearer string) {}
 
-func (fs fileServiceMock) WriteStores(stores []string) {
+func (fs fileServiceMock) AddStores(stores []domain.Store) {
 }
 
 func TestStoresNotAddedIfAlreadyPresentInFile(t *testing.T) {
@@ -71,8 +72,10 @@ func TestStoresNotAddedIfAlreadyPresentInFile(t *testing.T) {
 	stores := foodApi.checkStoresInResponse(responseStruct)
 
 	assert.Equal(t, 2, len(stores), "2 shops expected, but only "+strconv.Itoa(len(stores))+" found")
-	assert.Equal(t, "Bakery", stores[0], "Bakery expected, but found "+stores[0])
-	assert.Equal(t, "Fish shop", stores[1], "Fish shop expected, but found "+stores[1])
+	assert.Equal(t, "Bakery", stores[0].GetName(), "Bakery expected, but found "+stores[0].GetName())
+	assert.Equal(t, 2, stores[0].GetItemsAvailable())
+	assert.Equal(t, "Fish shop", stores[1].GetName(), "Fish shop expected, but found "+stores[1].GetName())
+	assert.Equal(t, 1, stores[1].GetItemsAvailable())
 }
 
 func TestAllStoresAddedIfNoStoresInFile(t *testing.T) {
@@ -80,8 +83,8 @@ func TestAllStoresAddedIfNoStoresInFile(t *testing.T) {
 	responseStruct := parseJsonResponse(response)
 
 	fs := newFileServiceMock("", "")
-	fs.ReadStoresFromFileMock = func() string {
-		return ""
+	fs.ReadStoresFromFileMock = func() []domain.Store {
+		return []domain.Store{}
 	}
 
 	foodApi := NewFoodApi(NewFoodApiAuth(fs), fs, "", "", "")
@@ -89,9 +92,12 @@ func TestAllStoresAddedIfNoStoresInFile(t *testing.T) {
 	stores := foodApi.checkStoresInResponse(responseStruct)
 
 	assert.Equal(t, 3, len(stores), "3 shops expected, but only "+strconv.Itoa(len(stores))+" found")
-	assert.Equal(t, "Meat shop", stores[0], "Meat shop expected, but found "+stores[0])
-	assert.Equal(t, "Bakery", stores[1], "Bakery expected, but found "+stores[1])
-	assert.Equal(t, "Fish shop", stores[2], "Fish shop expected, but found "+stores[2])
+	assert.Equal(t, "Meat shop", stores[0].GetName(), "Meat shop expected, but found "+stores[0].GetName())
+	assert.Equal(t, 1, stores[0].GetItemsAvailable())
+	assert.Equal(t, "Bakery", stores[1].GetName(), "Bakery expected, but found "+stores[1].GetName())
+	assert.Equal(t, 2, stores[1].GetItemsAvailable())
+	assert.Equal(t, "Fish shop", stores[2].GetName(), "Fish shop expected, but found "+stores[2].GetName())
+	assert.Equal(t, 1, stores[2].GetItemsAvailable())
 }
 
 func TestOnlyStoresWithItemsAvailableAdded(t *testing.T) {
@@ -99,8 +105,8 @@ func TestOnlyStoresWithItemsAvailableAdded(t *testing.T) {
 	responseStruct := parseJsonResponse(response)
 
 	fs := newFileServiceMock("", "")
-	fs.ReadStoresFromFileMock = func() string {
-		return ""
+	fs.ReadStoresFromFileMock = func() []domain.Store {
+		return []domain.Store{}
 	}
 
 	foodApi := NewFoodApi(NewFoodApiAuth(fs), fs, "", "", "")
@@ -108,7 +114,8 @@ func TestOnlyStoresWithItemsAvailableAdded(t *testing.T) {
 	stores := foodApi.checkStoresInResponse(responseStruct)
 
 	assert.Equal(t, 1, len(stores), "1 shop expected, but "+strconv.Itoa(len(stores))+" found")
-	assert.Equal(t, "Meat shop", stores[0], "Meat shop expected, but found "+stores[0])
+	assert.Equal(t, "Meat shop", stores[0].GetName(), "Meat shop expected, but found "+stores[0].GetName())
+	assert.Equal(t, 1, stores[0].GetItemsAvailable())
 }
 
 func TestStoresNameContainsItemName(t *testing.T) {
@@ -116,8 +123,8 @@ func TestStoresNameContainsItemName(t *testing.T) {
 	responseStruct := parseJsonResponse(response)
 
 	fs := newFileServiceMock("", "")
-	fs.ReadStoresFromFileMock = func() string {
-		return ""
+	fs.ReadStoresFromFileMock = func() []domain.Store {
+		return []domain.Store{}
 	}
 
 	foodApi := NewFoodApi(NewFoodApiAuth(fs), fs, "", "", "")
@@ -125,9 +132,12 @@ func TestStoresNameContainsItemName(t *testing.T) {
 	stores := foodApi.checkStoresInResponse(responseStruct)
 
 	assert.Equal(t, 3, len(stores), "3 shop expected, but "+strconv.Itoa(len(stores))+" found")
-	assert.Equal(t, "Shop - Meat", stores[0], "Shop - Meat expected, but found "+stores[0])
-	assert.Equal(t, "Bakery - Bread", stores[1], "Bakery - Bread expected, but found "+stores[1])
-	assert.Equal(t, "Shop - Fish", stores[2], "Shop - Fish expected, but found "+stores[2])
+	assert.Equal(t, "Shop - Meat", stores[0].GetName(), "Shop - Meat expected, but found "+stores[0].GetName())
+	assert.Equal(t, 1, stores[0].GetItemsAvailable())
+	assert.Equal(t, "Bakery - Bread", stores[1].GetName(), "Bakery - Bread expected, but found "+stores[1].GetName())
+	assert.Equal(t, 2, stores[1].GetItemsAvailable())
+	assert.Equal(t, "Shop - Fish", stores[2].GetName(), "Shop - Fish expected, but found "+stores[2].GetName())
+	assert.Equal(t, 1, stores[2].GetItemsAvailable())
 }
 
 func TestBuildRequestIsCorrectlyBuilt(t *testing.T) {
@@ -139,11 +149,11 @@ func TestBuildRequestIsCorrectlyBuilt(t *testing.T) {
 }
 
 type foodAuthMock struct {
-	fileService domain.PersistorService
+	storeService ports.StoreService
 }
 
-func newFoodAuthMock(fileService domain.PersistorService) *foodAuthMock {
-	return &foodAuthMock{fileService}
+func newFoodAuthMock(storeService ports.StoreService) *foodAuthMock {
+	return &foodAuthMock{storeService}
 }
 
 func (authMock foodAuthMock) GetAuthBearer() string {

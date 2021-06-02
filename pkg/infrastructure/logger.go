@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func InitLogger() *zap.Logger {
+func InitLogger() {
 	writerSyncer := getLogWriter()
 	encoder := getEncoder()
 
@@ -17,7 +17,8 @@ func InitLogger() *zap.Logger {
 		zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), zapcore.DebugLevel),
 	)
 
-	return zap.New(core, zap.AddCaller())
+	logger := zap.New(core, zap.AddCaller())
+	zap.ReplaceGlobals(logger)
 }
 
 func getEncoder() zapcore.Encoder {

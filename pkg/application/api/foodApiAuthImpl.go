@@ -8,19 +8,15 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/marc/get-food-to-go/pkg/domain"
+	"github.com/marc/get-food-to-go/pkg/domain/ports"
 	"go.uber.org/zap"
 )
 
-type FoodApiAuth interface {
-	GetAuthBearer() string
-}
-
 type FoodApiAuthImpl struct {
-	fileService domain.PersistorService
+	fileService ports.Repository
 }
 
-func NewFoodApiAuth(fs domain.PersistorService) FoodApiAuthImpl {
+func NewFoodApiAuth(fs ports.Repository) FoodApiAuthImpl {
 	return FoodApiAuthImpl{fs}
 }
 
@@ -46,7 +42,7 @@ func (apiAuth FoodApiAuthImpl) GetAuthBearer() string {
 	var authResponseObject AuthResponse
 	json.Unmarshal(body, &authResponseObject)
 
-	apiAuth.fileService.WriteBearer(authResponseObject.Token)
+	apiAuth.fileService.UpdateBearer(authResponseObject.Token)
 	return authResponseObject.Token
 }
 

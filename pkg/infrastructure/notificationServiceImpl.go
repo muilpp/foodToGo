@@ -1,4 +1,4 @@
-package domain
+package infrastructure
 
 import (
 	"crypto/tls"
@@ -10,11 +10,6 @@ import (
 	"go.uber.org/zap"
 	gomail "gopkg.in/mail.v2"
 )
-
-type NotificationService interface {
-	SendMail(message string)
-	SendTelegramMessage(message string)
-}
 
 type NotificationServiceImpl struct {
 }

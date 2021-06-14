@@ -9,6 +9,7 @@ import (
 	"github.com/marc/get-food-to-go/pkg/application/api"
 	"github.com/marc/get-food-to-go/pkg/domain/ports"
 	"github.com/marc/get-food-to-go/pkg/infrastructure"
+	"github.com/marc/get-food-to-go/pkg/infrastructure/persistance"
 	"go.uber.org/zap"
 )
 
@@ -30,7 +31,9 @@ func init() {
 		zap.L().Error("Error loading .env file: ", zap.Error(err))
 	}
 
-	repository = infrastructure.NewFileRepository(BEARER_FILE_NAME, STORES_FILE_NAME)
+	repository = persistance.NewFileRepository(BEARER_FILE_NAME, STORES_FILE_NAME)
+
+	//repository = persistance.NewMysqlRepository(os.Getenv("DB_USER"), os.Getenv("DB_PWD"), os.Getenv("DB_IP"), os.Getenv("DB_NAME"))
 	storeService = ports.NewStoreService(repository)
 
 	authService = api.NewFoodApiAuth(storeService)

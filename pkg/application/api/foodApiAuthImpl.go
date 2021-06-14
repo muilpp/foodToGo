@@ -13,7 +13,7 @@ import (
 )
 
 type FoodApiAuthImpl struct {
-	fileService ports.Repository
+	repositoryService ports.Repository
 }
 
 func NewFoodApiAuth(fs ports.Repository) FoodApiAuthImpl {
@@ -42,7 +42,7 @@ func (apiAuth FoodApiAuthImpl) GetAuthBearer() string {
 	var authResponseObject AuthResponse
 	json.Unmarshal(body, &authResponseObject)
 
-	apiAuth.fileService.UpdateBearer(authResponseObject.Token)
+	apiAuth.repositoryService.UpdateBearer(authResponseObject.Token)
 	return authResponseObject.Token
 }
 

@@ -31,9 +31,12 @@ func init() {
 		zap.L().Error("Error loading .env file: ", zap.Error(err))
 	}
 
-	repository = persistance.NewFileRepository(BEARER_FILE_NAME, STORES_FILE_NAME)
+	if os.Getenv("DB_USER") == "" {
+		repository = persistance.NewFileRepository(BEARER_FILE_NAME, STORES_FILE_NAME)
+	} else {
+		repository = persistance.NewMysqlRepository(os.Getenv("DB_USER"), os.Getenv("DB_PWD"), os.Getenv("DB_IP"), os.Getenv("DB_NAME"))
+	}
 
-	//repository = persistance.NewMysqlRepository(os.Getenv("DB_USER"), os.Getenv("DB_PWD"), os.Getenv("DB_IP"), os.Getenv("DB_NAME"))
 	storeService = ports.NewStoreService(repository)
 
 	authService = api.NewFoodApiAuth(storeService)

@@ -1,6 +1,8 @@
 package persistance
 
 import (
+	"time"
+
 	"github.com/marc/get-food-to-go/pkg/domain"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
@@ -74,6 +76,8 @@ func (db *MysqlRepository) GetStores() []domain.Store {
 	var stores []StoreTable
 	database.Find(&stores)
 
+	today := time.Now().Format("2006-01-02")
+	database.Where("created_at > ?", today).Find(&stores)
 	return StoreTablesToStoreObjects(stores)
 }
 

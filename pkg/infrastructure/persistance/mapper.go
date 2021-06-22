@@ -33,3 +33,14 @@ func StoreObjectsToStoreTables(storeObjects []domain.Store) []StoreTable {
 
 	return stores
 }
+
+func StoreTableCountResultsToStoreCounterObjects(storeTables []Result) []domain.StoreCounter {
+
+	var storesCounter []domain.StoreCounter
+
+	for _, v := range storeTables {
+		storesCounter = append(storesCounter, *domain.NewStoreCounter(v.Element, v.Total))
+	}
+
+	return storesCounter
+}

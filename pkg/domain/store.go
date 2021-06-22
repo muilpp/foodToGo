@@ -25,3 +25,20 @@ func (s Store) GetItemsAvailable() int {
 func (s Store) String() string {
 	return s.GetName() + " (" + s.GetCountry() + ")"
 }
+
+type StoreCounter struct {
+	name  string
+	total int
+}
+
+func NewStoreCounter(name string, total int) *StoreCounter {
+	return &StoreCounter{name, total}
+}
+
+func (s StoreCounter) GetName() string {
+	return s.name
+}
+
+func (s StoreCounter) GetTotal() int {
+	return s.total
+}

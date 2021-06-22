@@ -50,6 +50,18 @@ func (fs *FileRepository) GetStores() []domain.Store {
 	return stores
 }
 
+func (fs *FileRepository) GetStoresByTimesAppeared() []domain.StoreCounter {
+	return []domain.StoreCounter{}
+}
+
+func (fs *FileRepository) GetStoresByDayOfWeek() []domain.StoreCounter {
+	return []domain.StoreCounter{}
+}
+
+func (fs *FileRepository) GetStoresByHourOfDay() []domain.StoreCounter {
+	return []domain.StoreCounter{}
+}
+
 func (fs *FileRepository) AddStores(stores []domain.Store) {
 	f, err := os.OpenFile(fs.storesFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
 

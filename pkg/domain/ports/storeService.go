@@ -1,6 +1,8 @@
 package ports
 
-import "github.com/marc/get-food-to-go/pkg/domain"
+import (
+	"github.com/marc/get-food-to-go/pkg/domain"
+)
 
 type StoreService interface {
 	GetBearer() string
@@ -13,6 +15,9 @@ type Repository interface {
 	GetBearer() string
 	UpdateBearer(bearer string)
 	GetStores() []domain.Store
+	GetStoresByTimesAppeared() []domain.StoreCounter
+	GetStoresByDayOfWeek() []domain.StoreCounter
+	GetStoresByHourOfDay() []domain.StoreCounter
 	AddStores(stores []domain.Store)
 }
 

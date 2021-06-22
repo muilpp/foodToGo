@@ -35,39 +35,51 @@ func parseJsonResponse(response []byte) domain.FoodJson {
 	return responseStruct
 }
 
-type fileServiceMock struct {
+type RepositoryMock struct {
 	bearerFile             string
 	storeFile              string
 	ReadStoresFromFileMock func() []domain.Store
 }
 
-func newFileServiceMock(bearerFile string, storeFile string) fileServiceMock {
-	return fileServiceMock{
+func newRepositoryMock(bearerFile string, storeFile string) RepositoryMock {
+	return RepositoryMock{
 		bearerFile:             bearerFile,
 		storeFile:              storeFile,
 		ReadStoresFromFileMock: func() []domain.Store { return []domain.Store{*domain.NewStore("Meat shop", "ES", 1)} },
 	}
 }
 
-func (fs fileServiceMock) GetBearer() string {
+func (fs RepositoryMock) GetBearer() string {
 	return ""
 }
 
-func (fs fileServiceMock) GetStores() []domain.Store {
+func (fs RepositoryMock) GetStores() []domain.Store {
 	return fs.ReadStoresFromFileMock()
 }
 
-func (fs fileServiceMock) UpdateBearer(bearer string) {}
+func (fs RepositoryMock) GetStoresByTimesAppeared() []domain.Store {
+	return []domain.Store{}
+}
 
-func (fs fileServiceMock) AddStores(stores []domain.Store) {
+func (fs RepositoryMock) GetStoresByDayOfWeek() []domain.Store {
+	return []domain.Store{}
+}
+
+func (fs RepositoryMock) GetStoresByHourOfDay() []domain.Store {
+	return []domain.Store{}
+}
+
+func (fs RepositoryMock) UpdateBearer(bearer string) {}
+
+func (fs RepositoryMock) AddStores(stores []domain.Store) {
 }
 
 func TestStoresNotAddedIfAlreadyPresentInFile(t *testing.T) {
 	response := []byte("{\"groupings\": [{\"discover_bucket\": {\"items\": [{\"store\": {\"store_name\": \"Meat shop\"},\"items_available\": 1}, {\"store\": {\"store_name\": \"Bakery\"},\"items_available\": 2}, {\"store\": {\"store_name\": \"Fish shop\"},\"items_available\": 1}]}}]}")
 	responseStruct := parseJsonResponse(response)
 
-	fs := newFileServiceMock("", "")
-	foodApi := NewFoodApi(NewFoodApiAuth(fs), fs, "", "", "")
+	repoMock := newRepositoryMock("", "")
+	foodApi := NewFoodApi(NewFoodApiAuth(repoMock), repoMock, "", "", "")
 
 	stores := foodApi.checkStoresInResponse(responseStruct)
 
@@ -82,12 +94,12 @@ func TestAllStoresAddedIfNoStoresInFile(t *testing.T) {
 	response := []byte("{\"groupings\": [{\"discover_bucket\": {\"items\": [{\"store\": {\"store_name\": \"Meat shop\"},\"items_available\": 1}, {\"store\": {\"store_name\": \"Bakery\"},\"items_available\": 2}, {\"store\": {\"store_name\": \"Fish shop\"},\"items_available\": 1}]}}]}")
 	responseStruct := parseJsonResponse(response)
 
-	fs := newFileServiceMock("", "")
-	fs.ReadStoresFromFileMock = func() []domain.Store {
+	repoMock := newRepositoryMock("", "")
+	repoMock.ReadStoresFromFileMock = func() []domain.Store {
 		return []domain.Store{}
 	}
 
-	foodApi := NewFoodApi(NewFoodApiAuth(fs), fs, "", "", "")
+	foodApi := NewFoodApi(NewFoodApiAuth(repoMock), repoMock, "", "", "")
 
 	stores := foodApi.checkStoresInResponse(responseStruct)
 
@@ -104,12 +116,12 @@ func TestOnlyStoresWithItemsAvailableAdded(t *testing.T) {
 	response := []byte("{\"groupings\": [{\"discover_bucket\": {\"items\": [{\"store\": {\"store_name\": \"Meat shop\"},\"items_available\": 1}, {\"store\": {\"store_name\": \"Bakery\"},\"items_available\": 0}, {\"store\": {\"store_name\": \"Fish shop\"},\"items_available\": 0}]}}]}")
 	responseStruct := parseJsonResponse(response)
 
-	fs := newFileServiceMock("", "")
-	fs.ReadStoresFromFileMock = func() []domain.Store {
+	repoMock := newRepositoryMock("", "")
+	repoMock.ReadStoresFromFileMock = func() []domain.Store {
 		return []domain.Store{}
 	}
 
-	foodApi := NewFoodApi(NewFoodApiAuth(fs), fs, "", "", "")
+	foodApi := NewFoodApi(NewFoodApiAuth(repoMock), repoMock, "", "", "")
 
 	stores := foodApi.checkStoresInResponse(responseStruct)
 
@@ -122,12 +134,12 @@ func TestStoresNameContainsItemName(t *testing.T) {
 	response := []byte("{\"groupings\": [{\"discover_bucket\": {\"items\": [{\"item\":{\"name\":\"Meat\"},\"store\":{\"store_id\":\"47816s\",\"store_name\":\"Shop\"},\"items_available\":1}, {\"item\":{\"name\":\"Bread\"},\"store\": {\"store_name\": \"Bakery\"},\"items_available\": 2}, {\"item\":{\"name\":\"Fish\"},\"store\": {\"store_name\": \"Shop\"},\"items_available\": 1}]}}]}")
 	responseStruct := parseJsonResponse(response)
 
-	fs := newFileServiceMock("", "")
-	fs.ReadStoresFromFileMock = func() []domain.Store {
+	repoMock := newRepositoryMock("", "")
+	repoMock.ReadStoresFromFileMock = func() []domain.Store {
 		return []domain.Store{}
 	}
 
-	foodApi := NewFoodApi(NewFoodApiAuth(fs), fs, "", "", "")
+	foodApi := NewFoodApi(NewFoodApiAuth(repoMock), repoMock, "", "", "")
 
 	stores := foodApi.checkStoresInResponse(responseStruct)
 
@@ -141,8 +153,8 @@ func TestStoresNameContainsItemName(t *testing.T) {
 }
 
 func TestBuildRequestIsCorrectlyBuilt(t *testing.T) {
-	fs := newFileServiceMock("", "")
-	foodApi := NewFoodApi(NewFoodApiAuth(fs), fs, "123", "10", "20")
+	repoMock := newRepositoryMock("", "")
+	foodApi := NewFoodApi(NewFoodApiAuth(repoMock), repoMock, "123", "10", "20")
 	bodyRequest := foodApi.buildRequestBody()
 
 	assert.Equal(t, "{\n\t\t\"user_id\": \"123\",\n\t\t\"bucket_identifiers\": [\"Favorites\"],\n\t\t\"origin\": {\n\t\t\t\"latitude\":10,\n\t\t\t\"longitude\":20\n\t\t},\n\t\t\"radius\": 5.0,\n\t\t\"discover_experiments\": [\"WEIGHTED_ITEMS\"]\n\t}", string(bodyRequest), "Body request expected: "+""+", but found: ", string(bodyRequest))
@@ -162,8 +174,8 @@ func (authMock foodAuthMock) GetAuthBearer() string {
 
 func TestNoStoresFoundWhenAuthBearerIsIncorrect(t *testing.T) {
 
-	fileServiceMock := newFileServiceMock("", "")
-	foodApi := NewFoodApi(newFoodAuthMock(fileServiceMock), fileServiceMock, "userId", "latitude", "longitude")
+	repositoryMock := newRepositoryMock("", "")
+	foodApi := NewFoodApi(newFoodAuthMock(repositoryMock), repositoryMock, "userId", "latitude", "longitude")
 	stores := foodApi.GetStoresWithFood()
 
 	assert.Equal(t, 0, len(stores))

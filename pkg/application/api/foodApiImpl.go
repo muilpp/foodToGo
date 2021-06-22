@@ -19,26 +19,26 @@ const MAX_TRIES = 1
 var currentTries int
 
 type FoodApiImpl struct {
-	foodAuth          ports.FoodServiceAuth
-	repositoryService ports.Repository
-	userId            string
-	latitude          string
-	longitude         string
+	foodAuth     ports.FoodServiceAuth
+	storeService ports.StoreService
+	userId       string
+	latitude     string
+	longitude    string
 }
 
-func NewFoodApi(authService ports.FoodServiceAuth, fs ports.Repository, userId string, latitude string, longitude string) FoodApiImpl {
+func NewFoodApi(authService ports.FoodServiceAuth, storeService ports.StoreService, userId string, latitude string, longitude string) FoodApiImpl {
 	return FoodApiImpl{
-		foodAuth:          authService,
-		repositoryService: fs,
-		userId:            userId,
-		latitude:          latitude,
-		longitude:         longitude,
+		foodAuth:     authService,
+		storeService: storeService,
+		userId:       userId,
+		latitude:     latitude,
+		longitude:    longitude,
 	}
 }
 
 func (foodApi FoodApiImpl) GetStoresWithFood() []domain.Store {
 
-	bearerToken := foodApi.repositoryService.GetBearer()
+	bearerToken := foodApi.storeService.GetBearer()
 
 	if bearerToken == "" {
 		bearerToken = foodApi.foodAuth.GetAuthBearer()
@@ -114,7 +114,7 @@ func (foodApi FoodApiImpl) parseResponse(responseBody io.ReadCloser) domain.Food
 func (foodApi FoodApiImpl) checkStoresInResponse(response domain.FoodJson) []domain.Store {
 	var stores []domain.Store
 
-	storesInFile := foodApi.repositoryService.GetStores()
+	storesInFile := foodApi.storeService.GetStores()
 
 	for _, grouping := range response.Groupings {
 		for _, item := range grouping.DiscoverBucket.Items {

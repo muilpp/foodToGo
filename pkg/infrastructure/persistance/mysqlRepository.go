@@ -3,6 +3,7 @@ package persistance
 import (
 	"time"
 
+	"github.com/jinzhu/now"
 	"github.com/marc/get-food-to-go/pkg/domain"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
@@ -12,6 +13,11 @@ import (
 type StoreTable struct {
 	gorm.Model
 	Store string
+}
+
+type Result struct {
+	Element string
+	Total   int
 }
 
 type BearerTable struct {
@@ -74,11 +80,43 @@ func (db *MysqlRepository) GetStores() []domain.Store {
 	database := openConnection(db.user, db.pwd, db.ip, db.database)
 
 	var stores []StoreTable
-	database.Find(&stores)
 
 	today := time.Now().Format("2006-01-02")
 	database.Where("created_at > ?", today).Find(&stores)
 	return StoreTablesToStoreObjects(stores)
+}
+
+func (db *MysqlRepository) GetStoresByTimesAppeared() []domain.StoreCounter {
+	database := openConnection(db.user, db.pwd, db.ip, db.database)
+
+	var stores []StoreTable
+	var result []Result
+	thisMonth := now.BeginningOfMonth().Format("2006-01-02")
+	database.Model(&stores).Select("store as element, count(store) as total").Where("created_at > ?", thisMonth).Group("store").Order("total").Find(&result)
+
+	return StoreTableCountResultsToStoreCounterObjects(result)
+}
+
+func (db *MysqlRepository) GetStoresByDayOfWeek() []domain.StoreCounter {
+	database := openConnection(db.user, db.pwd, db.ip, db.database)
+
+	var stores []StoreTable
+	var result []Result
+	thisMonth := now.BeginningOfMonth().Format("2006-01-02")
+	database.Model(&stores).Select("DAYNAME(CREATED_AT) as element, COUNT(CREATED_AT) as total").Where("created_at > ?", thisMonth).Group("DAYNAME(CREATED_AT)").Order("total").Find(&result)
+
+	return StoreTableCountResultsToStoreCounterObjects(result)
+}
+
+func (db *MysqlRepository) GetStoresByHourOfDay() []domain.StoreCounter {
+	database := openConnection(db.user, db.pwd, db.ip, db.database)
+
+	var stores []StoreTable
+	var result []Result
+	thisMonth := now.BeginningOfMonth().Format("2006-01-02")
+	database.Model(&stores).Select("HOUR(CREATED_AT) as element, COUNT(CREATED_AT) as total").Where("created_at > ?", thisMonth).Group("HOUR(CREATED_AT)").Order("total").Find(&result)
+
+	return StoreTableCountResultsToStoreCounterObjects(result)
 }
 
 func (db *MysqlRepository) AddStores(stores []domain.Store) {

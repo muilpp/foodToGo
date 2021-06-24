@@ -27,7 +27,7 @@ func (gs GraphServiceImpl) PrintAllReports() {
 	gs.printValuesToFile(result, ports.FOOD_CHART_BY_DAY_OF_WEEK, "(by day of week)")
 
 	result = gs.repository.GetStoresByTimesAppeared()
-	gs.printValuesToFile(result, ports.FOOD_CHART_BY_STORE, "")
+	gs.printValuesToFile(result, ports.FOOD_CHART_BY_STORE, "(by store)")
 }
 
 func (gs GraphServiceImpl) printValuesToFile(storeCounter []domain.StoreCounter, fileName string, subtitle string) {

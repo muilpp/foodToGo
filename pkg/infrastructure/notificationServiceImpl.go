@@ -96,7 +96,7 @@ func (ns NotificationServiceImpl) SendTelegramReports() {
 func (ns NotificationServiceImpl) sendFile(fileName string, bot *tgbotapi.BotAPI, fileDir string, chatId int64) {
 	filePath := path.Join(fileDir, fileName)
 
-	msg := tgbotapi.NewDocument(chatId, filePath)
+	msg := tgbotapi.NewPhoto(chatId, filePath)
 	_, err2 := bot.Send(msg)
 
 	if err2 != nil {

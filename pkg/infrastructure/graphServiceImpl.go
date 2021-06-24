@@ -32,7 +32,7 @@ func (gs GraphServiceImpl) PrintAllReports() {
 
 func (gs GraphServiceImpl) printValuesToFile(storeCounter []domain.StoreCounter, fileName string, subtitle string) {
 	valueSlice := getValuesToPlot(storeCounter)
-	tickSlice := getYAxisLabels(float64(valueSlice[0].Value))
+	tickSlice := getYAxisLabels(storeCounter)
 
 	year, month, _ := time.Now().AddDate(0, 0, -1).Date()
 	title := month.String() + " " + strconv.Itoa(year) + " " + subtitle
@@ -57,11 +57,12 @@ func (gs GraphServiceImpl) printValuesToFile(storeCounter []domain.StoreCounter,
 	graph.Render(chart.PNG, f)
 }
 
-func getYAxisLabels(max float64) []chart.Tick {
+func getYAxisLabels(storeSlice []domain.StoreCounter) []chart.Tick {
 	var tickSlice []chart.Tick
 
-	for i := 0; i <= int(max); i++ {
-		tickSlice = append(tickSlice, chart.Tick{Value: float64(i), Label: strconv.Itoa(int(i))})
+	tickSlice = append(tickSlice, chart.Tick{Value: float64(0), Label: strconv.Itoa(int(0))})
+	for _, v := range storeSlice {
+		tickSlice = append(tickSlice, chart.Tick{Value: float64(v.GetTotal()), Label: strconv.Itoa(int(v.GetTotal()))})
 	}
 
 	return tickSlice

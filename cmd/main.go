@@ -14,6 +14,7 @@ import (
 )
 
 var storeService ports.StoreService
+var graphService ports.GraphService
 var repository ports.Repository
 
 var authService ports.FoodServiceAuth
@@ -45,14 +46,24 @@ func init() {
 }
 
 func main() {
-	availableStores := foodApi.GetStoresWithFood()
+	executionType := os.Args[1]
 
-	if len(availableStores) > 0 {
-		storesString := strings.Join(application.StoresToString(availableStores), ", ")
-		zap.L().Info("Found ", zap.String("stores: ", storesString))
+	if executionType == "getFood" {
+		availableStores := foodApi.GetStoresWithFood()
 
-		storeService.AddStores(availableStores)
-		notificationService.SendMail(storesString)
-		notificationService.SendTelegramMessage(storesString)
+		if len(availableStores) > 0 {
+			storesString := strings.Join(application.StoresToString(availableStores), ", ")
+			zap.L().Info("Found ", zap.String("stores: ", storesString))
+
+			storeService.AddStores(availableStores)
+			notificationService.SendMail(storesString)
+			notificationService.SendTelegramMessage(storesString)
+		}
+	} else if executionType == "printGraph" {
+		graphService = infrastructure.NewGraphService(repository)
+		graphService.PrintAllReports()
+		notificationService.SendTelegramReports()
+	} else {
+		zap.L().Warn("Wrong argument received in main function ", zap.String("Argument: ", executionType))
 	}
 }

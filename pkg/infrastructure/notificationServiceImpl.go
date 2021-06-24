@@ -2,11 +2,13 @@ package infrastructure
 
 import (
 	"crypto/tls"
-	"log"
-	"net/http"
 	"os"
+	"path"
+	"strconv"
 	"strings"
 
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/marc/get-food-to-go/pkg/domain/ports"
 	"go.uber.org/zap"
 	gomail "gopkg.in/mail.v2"
 )
@@ -49,16 +51,55 @@ func (ns NotificationServiceImpl) SendMail(message string) {
 
 func (ns NotificationServiceImpl) SendTelegramMessage(message string) {
 	telegramToken := os.Getenv("TELEGRAM_API_TOKEN")
-	telegramChatId := os.Getenv("TELEGRAM_CHAT_ID")
+	telegramChatId, _ := strconv.ParseInt(os.Getenv("TELEGRAM_CHAT_ID"), 10, 64)
 
-	if telegramToken == "" || telegramChatId == "" {
+	if telegramToken == "" || telegramChatId == 0 {
 		return
 	}
 
-	requestUrl := "https://api.telegram.org/bot" + telegramToken + "/sendMessage?chat_id=" + telegramChatId + "&text=" + message
+	bot, err := tgbotapi.NewBotAPI(telegramToken)
+	bot.Debug = true
 
-	_, err := http.Get(requestUrl)
 	if err != nil {
-		log.Fatalln(err)
+		zap.L().Panic("Could not get telegram API instance", zap.Error(err))
+	}
+
+	msg := tgbotapi.NewMessage(telegramChatId, message)
+	_, err2 := bot.Send(msg)
+
+	if err2 != nil {
+		zap.L().Error("Message not sent", zap.Error(err2))
+	}
+}
+
+func (ns NotificationServiceImpl) SendTelegramReports() {
+	telegramToken := os.Getenv("TELEGRAM_API_TOKEN")
+	telegramChatId, _ := strconv.ParseInt(os.Getenv("TELEGRAM_CHAT_ID"), 10, 64)
+
+	if telegramToken == "" || telegramChatId == 0 {
+		return
+	}
+
+	bot, err := tgbotapi.NewBotAPI(telegramToken)
+	bot.Debug = true
+
+	if err != nil {
+		zap.L().Panic("Could not get telegram API instance", zap.Error(err))
+	}
+
+	fileDir, _ := os.Getwd()
+	ns.sendFile(ports.FOOD_CHART_BY_STORE, bot, fileDir, telegramChatId)
+	ns.sendFile(ports.FOOD_CHART_BY_DAY_OF_WEEK, bot, fileDir, telegramChatId)
+	ns.sendFile(ports.FOOD_CHART_BY_HOUR_OF_DAY, bot, fileDir, telegramChatId)
+}
+
+func (ns NotificationServiceImpl) sendFile(fileName string, bot *tgbotapi.BotAPI, fileDir string, chatId int64) {
+	filePath := path.Join(fileDir, fileName)
+
+	msg := tgbotapi.NewDocument(chatId, filePath)
+	_, err2 := bot.Send(msg)
+
+	if err2 != nil {
+		zap.L().Error("Document not sent", zap.Error(err2))
 	}
 }

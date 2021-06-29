@@ -19,10 +19,10 @@ To run the app, use the argument:
 
 ### Examples
 By store
-![alt text](https://github.com/muilpp/foodToGo/blob/main/food-by-store.gif)
+![alt text](https://github.com/muilpp/foodToGo/blob/main/examples/food-by-store.gif)
 
 By day of week 
-![alt text](https://github.com/muilpp/foodToGo/blob/main/food-by-day.gif)
+![alt text](https://github.com/muilpp/foodToGo/blob/main/examples/food-by-day.gif)
 
 By hour of day
-![alt text](https://github.com/muilpp/foodToGo/blob/main/food-by-hour.gif)
+![alt text](https://github.com/muilpp/foodToGo/blob/main/examples/food-by-hour.gif)

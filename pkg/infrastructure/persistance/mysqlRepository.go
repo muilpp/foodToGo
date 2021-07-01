@@ -91,8 +91,8 @@ func (db *MysqlRepository) GetStoresByTimesAppeared() []domain.StoreCounter {
 
 	var stores []StoreTable
 	var result []Result
-	thisMonth := now.BeginningOfMonth().Format("2006-01-02")
-	database.Model(&stores).Select("store as element, count(store) as total").Where("created_at > ?", thisMonth).Group("store").Order("total").Find(&result)
+	lastMonth := now.BeginningOfMonth().AddDate(0, -1, 0).Format("2006-01-02")
+	database.Model(&stores).Select("store as element, count(store) as total").Where("created_at > ?", lastMonth).Group("store").Order("total").Find(&result)
 
 	return StoreTableCountResultsToStoreCounterObjects(result)
 }
@@ -102,8 +102,8 @@ func (db *MysqlRepository) GetStoresByDayOfWeek() []domain.StoreCounter {
 
 	var stores []StoreTable
 	var result []Result
-	thisMonth := now.BeginningOfMonth().Format("2006-01-02")
-	database.Model(&stores).Select("DAYNAME(CREATED_AT) as element, COUNT(CREATED_AT) as total").Where("created_at > ?", thisMonth).Group("DAYNAME(CREATED_AT)").Order("total").Find(&result)
+	lastMonth := now.BeginningOfMonth().AddDate(0, -1, 0).Format("2006-01-02")
+	database.Model(&stores).Select("DAYNAME(CREATED_AT) as element, COUNT(CREATED_AT) as total").Where("created_at > ?", lastMonth).Group("DAYNAME(CREATED_AT)").Order("total").Find(&result)
 
 	return StoreTableCountResultsToStoreCounterObjects(result)
 }
@@ -113,8 +113,8 @@ func (db *MysqlRepository) GetStoresByHourOfDay() []domain.StoreCounter {
 
 	var stores []StoreTable
 	var result []Result
-	thisMonth := now.BeginningOfMonth().Format("2006-01-02")
-	database.Model(&stores).Select("HOUR(CREATED_AT) as element, COUNT(CREATED_AT) as total").Where("created_at > ?", thisMonth).Group("HOUR(CREATED_AT)").Order("total").Find(&result)
+	lastMonth := now.BeginningOfMonth().AddDate(0, -1, 0).Format("2006-01-02")
+	database.Model(&stores).Select("HOUR(CREATED_AT) as element, COUNT(CREATED_AT) as total").Where("created_at > ?", lastMonth).Group("HOUR(CREATED_AT)").Order("total").Find(&result)
 
 	return StoreTableCountResultsToStoreCounterObjects(result)
 }

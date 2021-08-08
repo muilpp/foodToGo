@@ -50,15 +50,15 @@ func (fs *FileRepository) GetStores() []domain.Store {
 	return stores
 }
 
-func (fs *FileRepository) GetStoresByTimesAppeared() []domain.StoreCounter {
+func (fs *FileRepository) GetStoresByTimesAppeared(frequency string) []domain.StoreCounter {
 	return []domain.StoreCounter{}
 }
 
-func (fs *FileRepository) GetStoresByDayOfWeek() []domain.StoreCounter {
+func (fs *FileRepository) GetStoresByDayOfWeek(frequency string) []domain.StoreCounter {
 	return []domain.StoreCounter{}
 }
 
-func (fs *FileRepository) GetStoresByHourOfDay() []domain.StoreCounter {
+func (fs *FileRepository) GetStoresByHourOfDay(frequency string) []domain.StoreCounter {
 	return []domain.StoreCounter{}
 }
 

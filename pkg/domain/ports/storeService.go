@@ -15,9 +15,9 @@ type Repository interface {
 	GetBearer() string
 	UpdateBearer(bearer string)
 	GetStores() []domain.Store
-	GetStoresByTimesAppeared() []domain.StoreCounter
-	GetStoresByDayOfWeek() []domain.StoreCounter
-	GetStoresByHourOfDay() []domain.StoreCounter
+	GetStoresByTimesAppeared(frequency string) []domain.StoreCounter
+	GetStoresByDayOfWeek(frequency string) []domain.StoreCounter
+	GetStoresByHourOfDay(frequency string) []domain.StoreCounter
 	AddStores(stores []domain.Store)
 }
 

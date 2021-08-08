@@ -61,8 +61,13 @@ func main() {
 		}
 	} else if executionType == "printGraph" {
 		graphService = infrastructure.NewGraphService(repository)
-		graphService.PrintAllReports()
-		notificationService.SendTelegramReports()
+		graphService.PrintAllMonthlyReports()
+		notificationService.SendTelegramMonthlyReports()
+	} else if executionType == "printGraphYear" {
+		graphService = infrastructure.NewGraphService(repository)
+		graphService.PrintAllYearlyReports()
+		notificationService.SendTelegramYearReports()
+
 	} else {
 		zap.L().Warn("Wrong argument received in main function ", zap.String("Argument: ", executionType))
 	}

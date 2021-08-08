@@ -3,3 +3,4 @@ resources/*.txt
 food.log
 *.png
 *.gif
+deploy.sh

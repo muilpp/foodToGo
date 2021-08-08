@@ -72,12 +72,30 @@ func (ns NotificationServiceImpl) SendTelegramMessage(message string) {
 	}
 }
 
-func (ns NotificationServiceImpl) SendTelegramReports() {
+func (ns NotificationServiceImpl) SendTelegramMonthlyReports() {
+	telegramChatId, bot := getTelegramCredentials()
+
+	fileDir, _ := os.Getwd()
+	ns.sendFile(ports.FOOD_CHART_BY_STORE_MONTHLY, bot, fileDir, telegramChatId)
+	ns.sendFile(ports.FOOD_CHART_BY_DAY_OF_WEEK_MONTHLY, bot, fileDir, telegramChatId)
+	ns.sendFile(ports.FOOD_CHART_BY_HOUR_OF_DAY_MONTHLY, bot, fileDir, telegramChatId)
+}
+
+func (ns NotificationServiceImpl) SendTelegramYearReports() {
+	telegramChatId, bot := getTelegramCredentials()
+
+	fileDir, _ := os.Getwd()
+	ns.sendFile(ports.FOOD_CHART_BY_STORE_YEARLY, bot, fileDir, telegramChatId)
+	ns.sendFile(ports.FOOD_CHART_BY_DAY_OF_WEEK_YEARLY, bot, fileDir, telegramChatId)
+	ns.sendFile(ports.FOOD_CHART_BY_HOUR_OF_DAY_YEARLY, bot, fileDir, telegramChatId)
+}
+
+func getTelegramCredentials() (int64, *tgbotapi.BotAPI) {
 	telegramToken := os.Getenv("TELEGRAM_API_TOKEN")
 	telegramChatId, _ := strconv.ParseInt(os.Getenv("TELEGRAM_CHAT_ID"), 10, 64)
 
 	if telegramToken == "" || telegramChatId == 0 {
-		return
+		zap.L().Panic("Got empty telegram credentials")
 	}
 
 	bot, err := tgbotapi.NewBotAPI(telegramToken)
@@ -87,10 +105,7 @@ func (ns NotificationServiceImpl) SendTelegramReports() {
 		zap.L().Panic("Could not get telegram API instance", zap.Error(err))
 	}
 
-	fileDir, _ := os.Getwd()
-	ns.sendFile(ports.FOOD_CHART_BY_STORE, bot, fileDir, telegramChatId)
-	ns.sendFile(ports.FOOD_CHART_BY_DAY_OF_WEEK, bot, fileDir, telegramChatId)
-	ns.sendFile(ports.FOOD_CHART_BY_HOUR_OF_DAY, bot, fileDir, telegramChatId)
+	return telegramChatId, bot
 }
 
 func (ns NotificationServiceImpl) sendFile(fileName string, bot *tgbotapi.BotAPI, fileDir string, chatId int64) {

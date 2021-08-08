@@ -3,7 +3,6 @@ package persistance
 import (
 	"time"
 
-	"github.com/jinzhu/now"
 	"github.com/marc/get-food-to-go/pkg/domain"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
@@ -86,35 +85,32 @@ func (db *MysqlRepository) GetStores() []domain.Store {
 	return StoreTablesToStoreObjects(stores)
 }
 
-func (db *MysqlRepository) GetStoresByTimesAppeared() []domain.StoreCounter {
+func (db *MysqlRepository) GetStoresByTimesAppeared(frequency string) []domain.StoreCounter {
 	database := openConnection(db.user, db.pwd, db.ip, db.database)
 
 	var stores []StoreTable
 	var result []Result
-	lastMonth := now.BeginningOfMonth().AddDate(0, -1, 0).Format("2006-01-02")
-	database.Model(&stores).Select("store as element, count(store) as total").Where("created_at > ?", lastMonth).Group("store").Order("total").Find(&result)
+	database.Model(&stores).Select("store as element, count(store) as total").Where("created_at > ?", frequency).Group("store").Order("total").Find(&result)
 
 	return StoreTableCountResultsToStoreCounterObjects(result)
 }
 
-func (db *MysqlRepository) GetStoresByDayOfWeek() []domain.StoreCounter {
+func (db *MysqlRepository) GetStoresByDayOfWeek(frequency string) []domain.StoreCounter {
 	database := openConnection(db.user, db.pwd, db.ip, db.database)
 
 	var stores []StoreTable
 	var result []Result
-	lastMonth := now.BeginningOfMonth().AddDate(0, -1, 0).Format("2006-01-02")
-	database.Model(&stores).Select("DAYNAME(CREATED_AT) as element, COUNT(CREATED_AT) as total").Where("created_at > ?", lastMonth).Group("DAYNAME(CREATED_AT)").Order("total").Find(&result)
+	database.Model(&stores).Select("DAYNAME(CREATED_AT) as element, COUNT(CREATED_AT) as total").Where("created_at > ?", frequency).Group("DAYNAME(CREATED_AT)").Order("total").Find(&result)
 
 	return StoreTableCountResultsToStoreCounterObjects(result)
 }
 
-func (db *MysqlRepository) GetStoresByHourOfDay() []domain.StoreCounter {
+func (db *MysqlRepository) GetStoresByHourOfDay(frequency string) []domain.StoreCounter {
 	database := openConnection(db.user, db.pwd, db.ip, db.database)
 
 	var stores []StoreTable
 	var result []Result
-	lastMonth := now.BeginningOfMonth().AddDate(0, -1, 0).Format("2006-01-02")
-	database.Model(&stores).Select("HOUR(CREATED_AT) as element, COUNT(CREATED_AT) as total").Where("created_at > ?", lastMonth).Group("HOUR(CREATED_AT)").Order("total").Find(&result)
+	database.Model(&stores).Select("HOUR(CREATED_AT) as element, COUNT(CREATED_AT) as total").Where("created_at > ?", frequency).Group("HOUR(CREATED_AT)").Order("total").Find(&result)
 
 	return StoreTableCountResultsToStoreCounterObjects(result)
 }

@@ -1,11 +1,13 @@
 package infrastructure
 
 import (
+	"fmt"
 	"os"
 	"sort"
 	"strconv"
 	"time"
 
+	"github.com/jinzhu/now"
 	"github.com/marc/get-food-to-go/pkg/domain"
 	"github.com/marc/get-food-to-go/pkg/domain/ports"
 	"github.com/wcharczuk/go-chart/v2"
@@ -19,23 +21,47 @@ func NewGraphService(repository ports.Repository) *GraphServiceImpl {
 	return &GraphServiceImpl{repository}
 }
 
-func (gs GraphServiceImpl) PrintAllReports() {
-	result := gs.repository.GetStoresByHourOfDay()
-	gs.printValuesToFile(result, ports.FOOD_CHART_BY_HOUR_OF_DAY, "(by hour of day)")
+func (gs GraphServiceImpl) PrintAllMonthlyReports() {
+	lastMonth := now.BeginningOfMonth().AddDate(0, -1, 0).Format("2006-01-02")
 
-	result = gs.repository.GetStoresByDayOfWeek()
-	gs.printValuesToFile(result, ports.FOOD_CHART_BY_DAY_OF_WEEK, "(by day of week)")
+	result := gs.repository.GetStoresByHourOfDay(lastMonth)
+	gs.printValuesToFile(result, ports.FOOD_CHART_BY_HOUR_OF_DAY_MONTHLY, "(by hour of day)", false)
 
-	result = gs.repository.GetStoresByTimesAppeared()
-	gs.printValuesToFile(result, ports.FOOD_CHART_BY_STORE, "(by store)")
+	result = gs.repository.GetStoresByDayOfWeek(lastMonth)
+	gs.printValuesToFile(result, ports.FOOD_CHART_BY_DAY_OF_WEEK_MONTHLY, "(by day of week)", false)
+
+	result = gs.repository.GetStoresByTimesAppeared(lastMonth)
+	gs.printValuesToFile(result, ports.FOOD_CHART_BY_STORE_MONTHLY, "(by store)", false)
 }
 
-func (gs GraphServiceImpl) printValuesToFile(storeCounter []domain.StoreCounter, fileName string, subtitle string) {
+func (gs GraphServiceImpl) PrintAllYearlyReports() {
+	lastYear := now.BeginningOfYear().AddDate(0, -1, 0).Format("2006-01-02")
+	fmt.Println("Last year: ", lastYear)
+	result := gs.repository.GetStoresByHourOfDay(lastYear)
+
+	fmt.Println("Values found: ", len(result))
+
+	gs.printValuesToFile(result, ports.FOOD_CHART_BY_HOUR_OF_DAY_YEARLY, "(by hour of day)", true)
+
+	result = gs.repository.GetStoresByDayOfWeek(lastYear)
+	gs.printValuesToFile(result, ports.FOOD_CHART_BY_DAY_OF_WEEK_YEARLY, "(by day of week)", true)
+
+	result = gs.repository.GetStoresByTimesAppeared(lastYear)
+	gs.printValuesToFile(result, ports.FOOD_CHART_BY_STORE_YEARLY, "(by store)", true)
+}
+
+func (gs GraphServiceImpl) printValuesToFile(storeCounter []domain.StoreCounter, fileName string, subtitle string, isYearlyReport bool) {
 	valueSlice := getValuesToPlot(storeCounter)
 	tickSlice := getYAxisLabels(storeCounter)
 
 	year, month, _ := time.Now().AddDate(0, 0, -1).Date()
-	title := month.String() + " " + strconv.Itoa(year) + " " + subtitle
+
+	var title string
+	if isYearlyReport {
+		title = strconv.Itoa(year) + " report " + subtitle
+	} else {
+		title = month.String() + " " + strconv.Itoa(year) + " " + subtitle
+	}
 
 	graph := chart.BarChart{
 		Title: title,

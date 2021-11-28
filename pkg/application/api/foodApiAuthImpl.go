@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/marc/get-food-to-go/pkg/domain/ports"
 	"go.uber.org/zap"
@@ -28,6 +29,12 @@ func (apiAuth FoodApiAuthImpl) GetAuthBearer() string {
 	json_data := apiAuth.buildAuthRequestBody(os.Getenv("API_USER"), os.Getenv("API_PASSWORD"))
 	resp, err := http.Post("https://apptoogoodtogo.com/api/auth/v2/loginByEmail", "application/json",
 		bytes.NewBuffer(json_data))
+
+	if resp.StatusCode > 400 {
+		zap.L().Info("Auth response status: " + strconv.Itoa(resp.StatusCode))
+		zap.L().Info("Auth response message: " + resp.Status)
+		panic("Authentication error, let's stop here...")
+	}
 
 	if err != nil {
 		zap.L().Error("Error getting bearer", zap.Error(err))

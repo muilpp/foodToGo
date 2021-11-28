@@ -41,8 +41,8 @@ func (foodApi FoodApiImpl) GetStoresWithFood() []domain.Store {
 	bearerToken := foodApi.storeService.GetBearer()
 
 	if bearerToken == "" {
-		bearerToken = foodApi.foodAuth.GetAuthBearer()
 		zap.L().Info("Current bearer empty, getting a new one")
+		bearerToken = foodApi.foodAuth.GetAuthBearer()
 	}
 
 	requestBody := foodApi.buildRequestBody()

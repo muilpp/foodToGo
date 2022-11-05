@@ -13,11 +13,12 @@ import (
 
 const storeTestFile = "storeTestFile.txt"
 const bearerTestFile = "bearerTestFile.txt"
+const refreshTokenTestFile = "refreshTokenTestFile.txt"
 
 var fileService ports.StoreService
 
 func TestMain(m *testing.M) {
-	fileService = NewFileRepository(bearerTestFile, storeTestFile)
+	fileService = NewFileRepository(bearerTestFile, storeTestFile, refreshTokenTestFile)
 	exitVal := m.Run()
 	cleanup(bearerTestFile)
 	cleanup(storeTestFile)

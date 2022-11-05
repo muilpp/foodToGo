@@ -7,5 +7,9 @@ type FoodService interface {
 }
 
 type FoodServiceAuth interface {
-	GetAuthBearer() string
+	Login() string
+}
+
+type FoodServiceToken interface {
+	RefreshToken() string
 }

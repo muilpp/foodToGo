@@ -7,6 +7,8 @@ import (
 type StoreService interface {
 	GetBearer() string
 	UpdateBearer(bearer string)
+	GetRefreshToken() string
+	UpdateRefreshToken(token string)
 	GetStores() []domain.Store
 	AddStores(stores []domain.Store)
 }
@@ -14,6 +16,8 @@ type StoreService interface {
 type Repository interface {
 	GetBearer() string
 	UpdateBearer(bearer string)
+	GetRefreshToken() string
+	UpdateRefreshToken(token string)
 	GetStores() []domain.Store
 	GetStoresByTimesAppeared(frequency string) []domain.StoreCounter
 	GetStoresByDayOfWeek(frequency string) []domain.StoreCounter
@@ -35,6 +39,14 @@ func (s storeService) GetBearer() string {
 
 func (s storeService) UpdateBearer(bearer string) {
 	s.repository.UpdateBearer(bearer)
+}
+
+func (s storeService) GetRefreshToken() string {
+	return s.repository.GetRefreshToken()
+}
+
+func (s storeService) UpdateRefreshToken(token string) {
+	s.repository.UpdateRefreshToken(token)
 }
 
 func (s storeService) GetStores() []domain.Store {

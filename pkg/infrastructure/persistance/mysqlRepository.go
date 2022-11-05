@@ -24,6 +24,11 @@ type BearerTable struct {
 	Bearer string
 }
 
+type RefreshTokenTable struct {
+	gorm.Model
+	Token string
+}
+
 func NewStoreTable(storeName string) *StoreTable {
 	return &StoreTable{Store: storeName}
 }
@@ -37,6 +42,7 @@ func intialMigration(user string, pwd string, ip string, database string) {
 
 	db.AutoMigrate(&StoreTable{})
 	db.AutoMigrate(&BearerTable{})
+	db.AutoMigrate(&RefreshTokenTable{})
 }
 
 type MysqlRepository struct {
@@ -72,6 +78,30 @@ func (db *MysqlRepository) UpdateBearer(newBearer string) {
 	} else {
 		bearerTable.Bearer = newBearer
 		database.Model(&BearerTable{}).Where("bearer = ?", currentBearer).Update("bearer", newBearer)
+	}
+}
+
+func (db *MysqlRepository) GetRefreshToken() string {
+	database := openConnection(db.user, db.pwd, db.ip, db.database)
+
+	var refreshToken RefreshTokenTable
+	database.Find(&refreshToken)
+
+	return refreshToken.Token
+}
+
+func (db *MysqlRepository) UpdateRefreshToken(newToken string) {
+	currentToken := db.GetRefreshToken()
+	database := openConnection(db.user, db.pwd, db.ip, db.database)
+
+	var refreshTokenTable RefreshTokenTable
+
+	if currentToken == "" {
+		refreshTokenTable.Token = newToken
+		database.Create(&refreshTokenTable)
+	} else {
+		refreshTokenTable.Token = newToken
+		database.Model(&RefreshTokenTable{}).Where("token = ?", currentToken).Update("token", newToken)
 	}
 }
 

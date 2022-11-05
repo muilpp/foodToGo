@@ -4,6 +4,7 @@ test:
 compile:
 	echo "Compiling for Linux, Mac and Win"
 	GOOS=linux go build -o ../bin/food2GoLinux;
+	GOOS=linux GOARCH=arm GOARM=5 go build -o ../bin/food2GoRpi;
 	GOOS=darwin GOARCH=amd64 go build -o ../bin/food2GoMac;
 	GOOS=windows GOARCH=amd64 go build -o ../bin/food2GoWindows;
 

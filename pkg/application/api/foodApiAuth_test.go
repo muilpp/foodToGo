@@ -9,7 +9,7 @@ import (
 func TestApiAuthBodyIsCorrectlyBuilt(t *testing.T) {
 
 	foodApiAuth := NewFoodApiAuth(nil)
-	requestBody := string(foodApiAuth.buildAuthRequestBody("mail", "password"))
+	requestBody := string(foodApiAuth.buildAuthRequestBody("mail"))
 
-	assert.Equal(t, "{\"device_type\":\"ANDROID\",\"email\":\"mail\",\"password\":\"password\"}", requestBody)
+	assert.Equal(t, "{\"device_type\":\"ANDROID\",\"email\":\"mail\"}", requestBody)
 }

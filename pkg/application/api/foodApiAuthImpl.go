@@ -28,7 +28,7 @@ type AuthResponse struct {
 }
 
 func (apiAuth FoodApiAuthImpl) Login() string {
-	json_data := apiAuth.buildAuthRequestBody(os.Getenv("API_USER"), os.Getenv("API_PASSWORD"))
+	json_data := apiAuth.buildAuthRequestBody(os.Getenv("API_USER"))
 	req, err := http.NewRequest("POST", "https://apptoogoodtogo.com/api/auth/v3/authByEmail/", bytes.NewBuffer(json_data))
 	if err != nil {
 		panic(err)
@@ -68,7 +68,7 @@ func (apiAuth FoodApiAuthImpl) Login() string {
 	return authResponseObject.PollingId
 }
 
-func (apiAuth FoodApiAuthImpl) buildAuthRequestBody(mail string, password string) []byte {
+func (apiAuth FoodApiAuthImpl) buildAuthRequestBody(mail string) []byte {
 	values := map[string]string{"device_type": "ANDROID", "email": mail}
 	json_data, err := json.Marshal(values)
 

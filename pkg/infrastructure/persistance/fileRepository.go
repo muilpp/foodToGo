@@ -3,9 +3,10 @@ package persistance
 import (
 	"bytes"
 	"io/ioutil"
-	"log"
 	"os"
 	"strings"
+
+	"go.uber.org/zap"
 
 	"github.com/marc/get-food-to-go/pkg/domain"
 )
@@ -28,7 +29,8 @@ func (fs *FileRepository) UpdateBearer(bearer string) {
 	f, err := os.Create(fs.bearerFileName)
 
 	if err != nil {
-		log.Fatal(err)
+		zap.L().Fatal(err.Error())
+		zap.L().Fatal(err.Error())
 	}
 
 	defer f.Close()
@@ -36,7 +38,7 @@ func (fs *FileRepository) UpdateBearer(bearer string) {
 	_, err2 := f.WriteString(bearer)
 
 	if err2 != nil {
-		log.Fatal(err2)
+		zap.L().Fatal(err2.Error())
 	}
 }
 
@@ -48,7 +50,7 @@ func (fs *FileRepository) UpdateRefreshToken(token string) {
 	f, err := os.Create(fs.refreshTokenFileName)
 
 	if err != nil {
-		log.Fatal(err)
+		zap.L().Fatal(err.Error())
 	}
 
 	defer f.Close()
@@ -56,7 +58,7 @@ func (fs *FileRepository) UpdateRefreshToken(token string) {
 	_, err2 := f.WriteString(token)
 
 	if err2 != nil {
-		log.Fatal(err2)
+		zap.L().Fatal(err2.Error())
 	}
 }
 
@@ -87,7 +89,7 @@ func (fs *FileRepository) AddStores(stores []domain.Store) {
 	f, err := os.OpenFile(fs.storesFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
 
 	if err != nil {
-		log.Fatal(err)
+		zap.L().Fatal(err.Error())
 	}
 
 	defer f.Close()
@@ -96,7 +98,7 @@ func (fs *FileRepository) AddStores(stores []domain.Store) {
 		_, err2 := f.WriteString(store.GetName() + "\n")
 
 		if err2 != nil {
-			log.Fatal(err2)
+			zap.L().Fatal(err2.Error())
 		}
 	}
 }
@@ -105,7 +107,7 @@ func (fs *FileRepository) readFile(fileName string) string {
 	content, err := ioutil.ReadFile(fileName)
 
 	if err != nil {
-		log.Fatal(err)
+		zap.L().Fatal(err.Error())
 	}
 
 	return string(bytes.TrimSpace(content))

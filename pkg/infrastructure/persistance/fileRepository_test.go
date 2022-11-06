@@ -1,7 +1,6 @@
 package persistance
 
 import (
-	"log"
 	"os"
 	"testing"
 
@@ -46,7 +45,7 @@ func cleanup(fileToRemove string) {
 	if _, err := os.Stat(fileToRemove); err == nil {
 		e := os.Remove(fileToRemove)
 		if e != nil {
-			log.Fatal(e)
+			zap.L().Fatal(err.Error())
 		}
 	}
 }

@@ -1,12 +1,11 @@
 package api
 
 import (
-	"bytes"
 	"encoding/json"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
+	"strings"
 
 	"github.com/marc/get-food-to-go/pkg/application"
 	"github.com/marc/get-food-to-go/pkg/domain"
@@ -20,15 +19,17 @@ var currentTries int
 
 type FoodApiImpl struct {
 	foodAuth     ports.FoodServiceAuth
+	foodToken    ports.FoodServiceToken
 	storeService ports.StoreService
 	userId       string
 	latitude     string
 	longitude    string
 }
 
-func NewFoodApi(authService ports.FoodServiceAuth, storeService ports.StoreService, userId string, latitude string, longitude string) FoodApiImpl {
+func NewFoodApi(authService ports.FoodServiceAuth, tokenService ports.FoodServiceToken, storeService ports.StoreService, userId string, latitude string, longitude string) FoodApiImpl {
 	return FoodApiImpl{
 		foodAuth:     authService,
+		foodToken:    tokenService,
 		storeService: storeService,
 		userId:       userId,
 		latitude:     latitude,
@@ -42,7 +43,8 @@ func (foodApi FoodApiImpl) GetStoresWithFood() []domain.Store {
 
 	if bearerToken == "" {
 		zap.L().Info("Current bearer empty, getting a new one")
-		bearerToken = foodApi.foodAuth.GetAuthBearer()
+		bearerToken = foodApi.foodToken.RefreshToken()
+		zap.L().Info("New bearer: " + bearerToken)
 	}
 
 	requestBody := foodApi.buildRequestBody()
@@ -53,7 +55,7 @@ func (foodApi FoodApiImpl) GetStoresWithFood() []domain.Store {
 	if resp.StatusCode == 401 && currentTries < MAX_TRIES {
 		currentTries++
 		zap.L().Info("Unauthorized request, get new bearer")
-		foodApi.foodAuth.GetAuthBearer()
+		foodApi.foodToken.RefreshToken()
 		return foodApi.GetStoresWithFood()
 	} else if resp.StatusCode != 200 {
 		zap.L().Error("Bad response while getting stores: ", zap.Int("status: ", resp.StatusCode), zap.Any("body", resp.Body))
@@ -68,41 +70,50 @@ func (foodApi FoodApiImpl) buildRequestBody() []byte {
 
 	return []byte(`{
 		"user_id": "` + foodApi.userId + `",
-		"bucket_identifiers": ["Favorites"],
 		"origin": {
 			"latitude":` + foodApi.latitude + `,
 			"longitude":` + foodApi.longitude + `
 		},
 		"radius": 5.0,
-		"discover_experiments": ["WEIGHTED_ITEMS"]
+		"favorites_only": "true"
 	}`)
 }
 
 func (foodApi FoodApiImpl) requestFood(requestBody []byte, bearerToken string) *http.Response {
-	req, err := http.NewRequest("POST", "https://apptoogoodtogo.com/api/item/v7/discover", bytes.NewBuffer(requestBody))
+	url := "https://apptoogoodtogo.com/api/item/v7/"
+	method := "POST"
+
+	payload := strings.NewReader(`{
+	  "user_id": "` + foodApi.userId + `",
+	  "origin": {"latitude": ` + foodApi.latitude + `, "longitude": ` + foodApi.longitude + `},
+	  "radius": 5.0,
+	  "favorites_only": "true"
+  }`)
+
+	client := &http.Client{}
+	req, err := http.NewRequest(method, url, payload)
+
 	if err != nil {
 		panic(err)
 	}
 
+	req.Header.Add("User-Agent", "TooGoodToGo/22.10.0 (4665) (iPhone/iPhone XS Max; iOS 16.0.2; Scale/3.00/iOS)")
 	req.Header.Add("Authorization", "Bearer "+bearerToken)
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("User-Agent", "PostmanRuntime/7.26.8")
-	req.Header.Add("Accept", "*/*")
+	req.Header.Add("Cookie", "datadome=mDevyaYDHRxV1yK2HnPi_55SaGyz61eJ3v-Avcf2BT96tJlMDm0xKE~WRnSRpVCyzlgWkjt7esTjjp2ONe5mGe3HOcRcLr.sZYx7OKrBdZ7s5aOMWox.5hHZNZTSOuz")
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
-
+	res, err := client.Do(req)
 	if err != nil {
 		zap.L().Fatal("Error requesting stores: ", zap.Error(err))
 	}
 
-	return resp
+	return res
 }
 
 func (foodApi FoodApiImpl) parseResponse(responseBody io.ReadCloser) domain.FoodJson {
 	body, err := ioutil.ReadAll(responseBody)
 	if err != nil {
-		log.Fatalln(err)
+		zap.L().Fatal(err.Error())
 	}
 
 	var responseStruct domain.FoodJson
@@ -116,18 +127,15 @@ func (foodApi FoodApiImpl) checkStoresInResponse(response domain.FoodJson) []dom
 
 	storesInFile := foodApi.storeService.GetStores()
 
-	for _, grouping := range response.Groupings {
-		for _, item := range grouping.DiscoverBucket.Items {
-			if item.ItemsAvailable > 0 {
-				storeName := item.Store.StoreName
-				if item.Item.Name != "" {
-					storeName += " - " + item.Item.Name
-				}
+	for _, item := range response.Items {
+		if item.ItemsAvailable > 0 && item.Store.StoreName != "" {
+			storeName := item.Store.StoreName
 
-				if !application.StoresContainStoreName(storesInFile, storeName) {
-					store := domain.NewStore(storeName, item.Store.StoreLocation.Address.Country.IsoCode, item.ItemsAvailable)
-					stores = append(stores, *store)
-				}
+			zap.L().Info("Store found: " + storeName)
+
+			if !application.StoresContainStoreName(storesInFile, storeName) {
+				store := domain.NewStore(storeName, item.Store.StoreLocation.Address.Country.IsoCode, item.ItemsAvailable)
+				stores = append(stores, *store)
 			}
 		}
 	}

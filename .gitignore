@@ -4,3 +4,4 @@ food.log
 *.png
 *.gif
 deploy.sh
+get-food.sh

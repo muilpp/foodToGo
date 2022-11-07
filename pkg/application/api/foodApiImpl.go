@@ -131,7 +131,9 @@ func (foodApi FoodApiImpl) checkStoresInResponse(response domain.FoodJson) []dom
 		if item.ItemsAvailable > 0 && item.Store.StoreName != "" {
 			storeName := item.Store.StoreName
 
-			zap.L().Info("Store found: " + storeName)
+			if item.Item.Name != "" {
+				storeName += " - " + item.Item.Name
+			}
 
 			if !application.StoresContainStoreName(storesInFile, storeName) {
 				store := domain.NewStore(storeName, item.Store.StoreLocation.Address.Country.IsoCode, item.ItemsAvailable)

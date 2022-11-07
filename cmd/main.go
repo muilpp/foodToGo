@@ -56,7 +56,7 @@ func main() {
 
 		if len(availableStores) > 0 {
 			storesString := strings.Join(application.StoresToString(availableStores), ", ")
-			zap.L().Info("Found ", zap.String("stores: ", storesString))
+			zap.L().Info("Found shop(s): " + storesString)
 
 			storeService.AddStores(availableStores)
 			notificationService.SendMail(storesString)

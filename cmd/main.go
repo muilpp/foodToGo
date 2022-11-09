@@ -2,11 +2,13 @@ package main
 
 import (
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/joho/godotenv"
 	"github.com/marc/get-food-to-go/pkg/application"
 	"github.com/marc/get-food-to-go/pkg/application/api"
+	"github.com/marc/get-food-to-go/pkg/domain"
 	"github.com/marc/get-food-to-go/pkg/domain/ports"
 	"github.com/marc/get-food-to-go/pkg/infrastructure"
 	"github.com/marc/get-food-to-go/pkg/infrastructure/persistance"
@@ -55,12 +57,17 @@ func main() {
 		availableStores := foodApi.GetStoresWithFood()
 
 		if len(availableStores) > 0 {
-			storesString := strings.Join(application.StoresToString(availableStores), ", ")
-			zap.L().Info("Found shop(s): " + storesString)
 
-			storeService.AddStores(availableStores)
-			notificationService.SendMail(storesString)
-			notificationService.SendTelegramMessage(storesString)
+			spanishStores := filterShops("ES", availableStores)
+			germanStores := filterShops("DE", availableStores)
+
+			telegramSpanishToken := os.Getenv("TELEGRAM_API_TOKEN")
+			telegramSpanishChatId, _ := strconv.ParseInt(os.Getenv("TELEGRAM_CHAT_ID"), 10, 64)
+			processShops(spanishStores, telegramSpanishToken, telegramSpanishChatId, true)
+
+			telegramGermanToken := os.Getenv("TELEGRAM_API_TOKEN_GERMAN")
+			telegramGermanChatId, _ := strconv.ParseInt(os.Getenv("TELEGRAM_CHAT_ID_GERMAN"), 10, 64)
+			processShops(germanStores, telegramGermanToken, telegramGermanChatId, false)
 		}
 	} else if executionType == "printGraph" {
 		graphService = infrastructure.NewGraphService(repository)
@@ -73,5 +80,31 @@ func main() {
 
 	} else {
 		zap.L().Warn("Wrong argument received in main function ", zap.String("Argument: ", executionType))
+	}
+}
+
+func filterShops(countryCode string, availableStores []domain.Store) []domain.Store {
+	var stores []domain.Store
+
+	for _, store := range availableStores {
+		if store.GetCountry() == countryCode {
+			stores = append(stores, store)
+		}
+	}
+
+	return stores
+}
+
+func processShops(stores []domain.Store, telegramToken string, telegramChatId int64, addToDatabase bool) {
+	if len(stores) > 0 {
+		storesString := strings.Join(application.StoresToString(stores), ", ")
+		zap.L().Info("Found shop(s): " + storesString)
+
+		if addToDatabase {
+			storeService.AddStores(stores)
+		}
+
+		notificationService.SendMail(storesString)
+		notificationService.SendTelegramMessage(storesString, telegramToken, telegramChatId)
 	}
 }

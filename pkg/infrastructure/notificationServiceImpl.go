@@ -49,9 +49,7 @@ func (ns NotificationServiceImpl) SendMail(message string) {
 	}
 }
 
-func (ns NotificationServiceImpl) SendTelegramMessage(message string) {
-	telegramToken := os.Getenv("TELEGRAM_API_TOKEN")
-	telegramChatId, _ := strconv.ParseInt(os.Getenv("TELEGRAM_CHAT_ID"), 10, 64)
+func (ns NotificationServiceImpl) SendTelegramMessage(message string, telegramToken string, telegramChatId int64) {
 
 	if telegramToken == "" || telegramChatId == 0 {
 		return

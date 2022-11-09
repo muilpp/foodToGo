@@ -3,6 +3,7 @@ package persistance
 import (
 	"os"
 	"testing"
+	"time"
 
 	"github.com/marc/get-food-to-go/pkg/domain"
 	"github.com/marc/get-food-to-go/pkg/domain/ports"
@@ -32,7 +33,7 @@ func TestBearerIsCorrectlyReadFromFile(t *testing.T) {
 }
 
 func TestStoresAreCorrectlyReadFromFile(t *testing.T) {
-	fileService.AddStores([]domain.Store{*domain.NewStore("store1", "", 0), *domain.NewStore("store2", "", 0)})
+	fileService.AddStores([]domain.Store{*domain.NewStore("store1", "", 0, time.Now()), *domain.NewStore("store2", "", 0, time.Now())})
 	stores := fileService.GetStores()
 
 	zap.L().Info("Stores found: ", zap.Any("Stores: ", stores))

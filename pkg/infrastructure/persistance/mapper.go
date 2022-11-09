@@ -1,11 +1,13 @@
 package persistance
 
 import (
+	"time"
+
 	"github.com/marc/get-food-to-go/pkg/domain"
 )
 
 func StoreTableToStoreObject(storeTable StoreTable) *domain.Store {
-	return domain.NewStore(storeTable.Store, "", 0)
+	return domain.NewStore(storeTable.Store, "", 0, time.Now())
 }
 
 func StoreObjectToStoreTable(store domain.Store) *StoreTable {
@@ -17,7 +19,7 @@ func StoreTablesToStoreObjects(storeTables []StoreTable) []domain.Store {
 	var stores []domain.Store
 
 	for _, v := range storeTables {
-		stores = append(stores, *domain.NewStore(v.Store, "", 0))
+		stores = append(stores, *domain.NewStore(v.Store, "", 0, v.CreatedAt))
 	}
 
 	return stores

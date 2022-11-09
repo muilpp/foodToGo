@@ -1,13 +1,16 @@
 package domain
 
+import "time"
+
 type Store struct {
 	name           string
 	country        string
 	itemsAvailable int
+	createdAt      time.Time
 }
 
-func NewStore(name string, country string, itemsAvailable int) *Store {
-	return &Store{name, country, itemsAvailable}
+func NewStore(name string, country string, itemsAvailable int, createdAt time.Time) *Store {
+	return &Store{name, country, itemsAvailable, createdAt}
 }
 
 func (s Store) GetName() string {
@@ -20,6 +23,10 @@ func (s Store) GetCountry() string {
 
 func (s Store) GetItemsAvailable() int {
 	return s.itemsAvailable
+}
+
+func (s Store) GetCreatedAt() time.Time {
+	return s.createdAt
 }
 
 func (s Store) String() string {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/marc/get-food-to-go/pkg/domain"
 	"github.com/marc/get-food-to-go/pkg/domain/ports"
@@ -45,7 +46,7 @@ func newRepositoryMock(bearerFile string, storeFile string) RepositoryMock {
 	return RepositoryMock{
 		bearerFile:             bearerFile,
 		storeFile:              storeFile,
-		ReadStoresFromFileMock: func() []domain.Store { return []domain.Store{*domain.NewStore("Meat shop", "ES", 1)} },
+		ReadStoresFromFileMock: func() []domain.Store { return []domain.Store{*domain.NewStore("Meat shop", "ES", 1, time.Now())} },
 	}
 }
 

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/marc/get-food-to-go/pkg/application"
 	"github.com/marc/get-food-to-go/pkg/domain"
@@ -136,7 +137,7 @@ func (foodApi FoodApiImpl) checkStoresInResponse(response domain.FoodJson) []dom
 			}
 
 			if !application.StoresContainStoreName(storesInFile, storeName) {
-				store := domain.NewStore(storeName, item.Store.StoreLocation.Address.Country.IsoCode, item.ItemsAvailable)
+				store := domain.NewStore(storeName, item.Store.StoreLocation.Address.Country.IsoCode, item.ItemsAvailable, time.Now())
 				stores = append(stores, *store)
 			}
 		}

@@ -1,13 +1,18 @@
 package application
 
-import "github.com/marc/get-food-to-go/pkg/domain"
+import (
+	"fmt"
+	"time"
+
+	"github.com/marc/get-food-to-go/pkg/domain"
+)
 
 func StoreToString(store domain.Store) string {
 	return store.GetName()
 }
 
-func StringToStore(name string, country string, itemsAvailable int) *domain.Store {
-	return domain.NewStore(name, country, itemsAvailable)
+func StringToStore(name string, country string, itemsAvailable int, createdAt time.Time) *domain.Store {
+	return domain.NewStore(name, country, itemsAvailable, createdAt)
 }
 
 func StoresToString(stores []domain.Store) []string {
@@ -24,7 +29,7 @@ func StringsToStores(stringStores []string) []domain.Store {
 	var stores []domain.Store
 
 	for _, store := range stringStores {
-		stores = append(stores, *domain.NewStore(store, "", 0))
+		stores = append(stores, *domain.NewStore(store, "", 0, time.Now()))
 	}
 
 	return stores
@@ -33,7 +38,10 @@ func StringsToStores(stringStores []string) []domain.Store {
 func StoresContainStoreName(stores []domain.Store, storeName string) bool {
 
 	for _, store := range stores {
-		if store.GetName() == storeName {
+		fmt.Println("Store: ", store.GetName())
+		fmt.Println("Time since: ", time.Since(store.GetCreatedAt()).Minutes())
+		fmt.Println("Time > 60 ? : ", time.Since(store.GetCreatedAt()).Minutes() > 120)
+		if store.GetName() == storeName && time.Since(store.GetCreatedAt()).Minutes() < 120 {
 			return true
 		}
 	}

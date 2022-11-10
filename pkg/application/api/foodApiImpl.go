@@ -145,3 +145,22 @@ func (foodApi FoodApiImpl) checkStoresInResponse(response domain.FoodJson) []dom
 
 	return stores
 }
+
+func (foodApi FoodApiImpl) FilterStoresByCountry(countryCode string, availableStores []domain.Store) string {
+	var stores []domain.Store
+
+	for _, store := range availableStores {
+		if store.GetCountry() == countryCode {
+			stores = append(stores, store)
+		}
+	}
+
+	storesString := strings.Join(application.StoresToString(stores), ", ")
+
+	if len(stores) > 0 {
+		zap.L().Info("Found shop(s): " + storesString)
+		foodApi.storeService.AddStores(stores)
+	}
+
+	return storesString
+}

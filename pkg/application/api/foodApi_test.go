@@ -80,6 +80,10 @@ func (fs RepositoryMock) UpdateRefreshToken(bearer string) {}
 func (fs RepositoryMock) AddStores(stores []domain.Store) {
 }
 
+func (fs RepositoryMock) GetCountries() []domain.Country {
+	return []domain.Country{}
+}
+
 func TestStoresNotAddedIfAlreadyPresentInFile(t *testing.T) {
 	response := []byte("{\"groupings\": [{\"discover_bucket\": {\"items\": [{\"store\": {\"store_name\": \"Meat shop\"},\"items_available\": 1}, {\"store\": {\"store_name\": \"Bakery\"},\"items_available\": 2}, {\"store\": {\"store_name\": \"Fish shop\"},\"items_available\": 1}]}}]}")
 	responseStruct := parseJsonResponse(response)

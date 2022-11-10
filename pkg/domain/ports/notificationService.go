@@ -1,8 +1,7 @@
 package ports
 
 type NotificationService interface {
-	SendMail(message string)
-	SendTelegramMessage(message string, telegramToken string, telegramChatId int64)
-	SendTelegramMonthlyReports()
-	SendTelegramYearReports()
+	SendNotification(storesString string, telegramToken string, telegramChatId int64)
+	SendTelegramMonthlyReports(countryCode string, telegramToken string, telegramChatId int64)
+	SendTelegramYearReports(countryCode string, telegramToken string, telegramChatId int64)
 }

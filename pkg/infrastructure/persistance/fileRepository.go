@@ -74,15 +74,15 @@ func (fs *FileRepository) GetStores() []domain.Store {
 	return stores
 }
 
-func (fs *FileRepository) GetStoresByTimesAppeared(frequency string) []domain.StoreCounter {
+func (fs *FileRepository) GetStoresByTimesAppeared(frequency string, countryCode string) []domain.StoreCounter {
 	return []domain.StoreCounter{}
 }
 
-func (fs *FileRepository) GetStoresByDayOfWeek(frequency string) []domain.StoreCounter {
+func (fs *FileRepository) GetStoresByDayOfWeek(frequency string, countryCode string) []domain.StoreCounter {
 	return []domain.StoreCounter{}
 }
 
-func (fs *FileRepository) GetStoresByHourOfDay(frequency string) []domain.StoreCounter {
+func (fs *FileRepository) GetStoresByHourOfDay(frequency string, countryCode string) []domain.StoreCounter {
 	return []domain.StoreCounter{}
 }
 
@@ -112,4 +112,8 @@ func (fs *FileRepository) readFile(fileName string) string {
 	}
 
 	return string(bytes.TrimSpace(content))
+}
+
+func (fs *FileRepository) GetCountries() []domain.Country {
+	return []domain.Country{}
 }

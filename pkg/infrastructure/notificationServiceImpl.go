@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/marc/get-food-to-go/pkg/domain"
 	"github.com/marc/get-food-to-go/pkg/domain/ports"
 	"go.uber.org/zap"
 	gomail "gopkg.in/mail.v2"
@@ -19,7 +20,7 @@ func NewNotificationService() *NotificationServiceImpl {
 	return &NotificationServiceImpl{}
 }
 
-func (ns NotificationServiceImpl) sendMail(message string) {
+func (ns NotificationServiceImpl) sendMail(stores []domain.Store) {
 	m := gomail.NewMessage()
 
 	mailFrom := os.Getenv("MAIL_FROM")
@@ -29,6 +30,11 @@ func (ns NotificationServiceImpl) sendMail(message string) {
 
 	if mailFrom == "" || mailTo == "" || mailPassword == "" {
 		return
+	}
+
+	var message string
+	for _, s := range stores {
+		message += s.GetName() + "\n"
 	}
 
 	sliceTo := strings.Split(mailTo, ",")
@@ -48,7 +54,7 @@ func (ns NotificationServiceImpl) sendMail(message string) {
 	}
 }
 
-func (ns NotificationServiceImpl) sendTelegramMessage(message string, telegramToken string, telegramChatId int64) {
+func (ns NotificationServiceImpl) sendTelegramMessage(stores []domain.Store, telegramToken string, telegramChatId int64) {
 
 	if telegramToken == "" || telegramChatId == 0 {
 		return
@@ -61,12 +67,16 @@ func (ns NotificationServiceImpl) sendTelegramMessage(message string, telegramTo
 		zap.L().Panic("Could not get telegram API instance", zap.Error(err))
 	}
 
-	msg := tgbotapi.NewMessage(telegramChatId, message)
-	_, err2 := bot.Send(msg)
+	for _, store := range stores {
+		link := "https://share.toogoodtogo.com/item/" + store.GetItem()
+		msg := tgbotapi.NewMessage(telegramChatId, store.GetName()+": "+link)
+		_, err2 := bot.Send(msg)
 
-	if err2 != nil {
-		zap.L().Error("Message not sent", zap.Error(err2))
+		if err2 != nil {
+			zap.L().Error("Message not sent", zap.Error(err2))
+		}
 	}
+
 }
 
 func (ns NotificationServiceImpl) SendTelegramMonthlyReports(countryCode string, telegramToken string, telegramChatId int64) {
@@ -114,9 +124,9 @@ func (ns NotificationServiceImpl) sendFile(fileName string, bot *tgbotapi.BotAPI
 	}
 }
 
-func (ns NotificationServiceImpl) SendNotification(storesString string, telegramToken string, telegramChatId int64) {
-	if len(storesString) > 0 {
-		ns.sendMail(storesString)
-		ns.sendTelegramMessage(storesString, telegramToken, telegramChatId)
+func (ns NotificationServiceImpl) SendNotification(stores []domain.Store, telegramToken string, telegramChatId int64) {
+	if len(stores) > 0 {
+		ns.sendMail(stores)
+		ns.sendTelegramMessage(stores, telegramToken, telegramChatId)
 	}
 }

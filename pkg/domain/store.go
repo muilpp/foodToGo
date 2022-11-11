@@ -5,12 +5,13 @@ import "time"
 type Store struct {
 	name           string
 	country        string
+	item           string
 	itemsAvailable int
 	createdAt      time.Time
 }
 
-func NewStore(name string, country string, itemsAvailable int, createdAt time.Time) *Store {
-	return &Store{name, country, itemsAvailable, createdAt}
+func NewStore(name string, country string, item string, itemsAvailable int, createdAt time.Time) *Store {
+	return &Store{name, country, item, itemsAvailable, createdAt}
 }
 
 func (s Store) GetName() string {
@@ -19,6 +20,10 @@ func (s Store) GetName() string {
 
 func (s Store) GetCountry() string {
 	return s.country
+}
+
+func (s Store) GetItem() string {
+	return s.item
 }
 
 func (s Store) GetItemsAvailable() int {

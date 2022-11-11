@@ -4,7 +4,7 @@ import "github.com/marc/get-food-to-go/pkg/domain"
 
 type FoodService interface {
 	GetStoresWithFood() []domain.Store
-	FilterStoresByCountry(countryCode string, availableStores []domain.Store) string
+	FilterStoresByCountry(countryCode string, availableStores []domain.Store) []domain.Store
 }
 
 type FoodServiceAuth interface {

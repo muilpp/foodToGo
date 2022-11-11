@@ -9,7 +9,7 @@ import (
 )
 
 func TestStoreIsConvertedToString(t *testing.T) {
-	store := domain.NewStore("Meat shop", "ES", 1, time.Now())
+	store := domain.NewStore("Meat shop", "ES", "", 1, time.Now())
 	stringStore := StoreToString(*store)
 
 	assert.Equal(t, "Meat shop", stringStore)
@@ -17,7 +17,7 @@ func TestStoreIsConvertedToString(t *testing.T) {
 
 func TestStoreSliceIsConvertedToStringSlice(t *testing.T) {
 
-	stores := []domain.Store{*domain.NewStore("Meat shop", "ES", 1, time.Now()), *domain.NewStore("Fish shop", "FR", 2, time.Now())}
+	stores := []domain.Store{*domain.NewStore("Meat shop", "ES", "", 1, time.Now()), *domain.NewStore("Fish shop", "FR", "", 2, time.Now())}
 	stringStores := StoresToString(stores)
 
 	assert.Equal(t, 2, len(stringStores))
@@ -43,7 +43,7 @@ func TestStringSliceIsConvertedToStoreSlice(t *testing.T) {
 }
 
 func TestStoreSliceContainsStoreName(t *testing.T) {
-	stores := []domain.Store{*domain.NewStore("Meat shop", "ES", 1, time.Now()), *domain.NewStore("Fish shop", "FR", 2, time.Now()), *domain.NewStore("Candy shop", "IT", 3, time.Now())}
+	stores := []domain.Store{*domain.NewStore("Meat shop", "ES", "", 1, time.Now()), *domain.NewStore("Fish shop", "FR", "", 2, time.Now()), *domain.NewStore("Candy shop", "IT", "", 3, time.Now())}
 
 	assert.True(t, StoresContainStoreName(stores, "Meat shop"))
 	assert.True(t, StoresContainStoreName(stores, "Fish shop"))

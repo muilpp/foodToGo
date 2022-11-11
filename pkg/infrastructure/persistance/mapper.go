@@ -7,7 +7,7 @@ import (
 )
 
 func StoreTableToStoreObject(storeTable StoreTable) *domain.Store {
-	return domain.NewStore(storeTable.Store, "", 0, time.Now())
+	return domain.NewStore(storeTable.Store, "", "", 0, time.Now())
 }
 
 func StoreObjectToStoreTable(store domain.Store) *StoreTable {
@@ -19,7 +19,7 @@ func StoreTablesToStoreObjects(storeTables []StoreTable) []domain.Store {
 	var stores []domain.Store
 
 	for _, v := range storeTables {
-		stores = append(stores, *domain.NewStore(v.Store, "", 0, v.CreatedAt))
+		stores = append(stores, *domain.NewStore(v.Store, "", "", 0, v.CreatedAt))
 	}
 
 	return stores

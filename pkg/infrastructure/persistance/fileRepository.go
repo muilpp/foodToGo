@@ -68,7 +68,7 @@ func (fs *FileRepository) GetStores() []domain.Store {
 	storeStrings := strings.Split(fs.readFile(fs.storesFileName), "\n")
 
 	for _, storeString := range storeStrings {
-		stores = append(stores, *domain.NewStore(storeString, "", 0, time.Now()))
+		stores = append(stores, *domain.NewStore(storeString, "", "", 0, time.Now()))
 	}
 
 	return stores

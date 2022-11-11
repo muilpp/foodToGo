@@ -3,7 +3,6 @@ package api
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -89,7 +88,7 @@ func (apiAuth FoodApiAuthImpl) RefreshToken() string {
 	req, err := http.NewRequest(method, url, payload)
 
 	if err != nil {
-		fmt.Println(err)
+		zap.L().Error(err.Error())
 	}
 
 	req.Header.Add("User-Agent", "TooGoodToGo/22.10.0 (4665) (iPhone/iPhone XS Max; iOS 16.0.2; Scale/3.00/iOS)")
@@ -100,7 +99,7 @@ func (apiAuth FoodApiAuthImpl) RefreshToken() string {
 
 	res, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err)
+		zap.L().Error(err.Error())
 	}
 
 	zap.L().Info("Bearer response status: " + res.Status)

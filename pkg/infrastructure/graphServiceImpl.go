@@ -1,7 +1,6 @@
 package infrastructure
 
 import (
-	"fmt"
 	"os"
 	"sort"
 	"strconv"
@@ -36,10 +35,7 @@ func (gs GraphServiceImpl) PrintAllMonthlyReports(countryCode string) {
 
 func (gs GraphServiceImpl) PrintAllYearlyReports(countryCode string) {
 	lastYear := now.BeginningOfYear().AddDate(0, -1, 0).Format("2006-01-02")
-	fmt.Println("Last year: ", lastYear)
 	result := gs.repository.GetStoresByHourOfDay(lastYear, countryCode)
-
-	fmt.Println("Values found: ", len(result))
 
 	gs.printValuesToFile(result, countryCode+ports.FOOD_CHART_BY_HOUR_OF_DAY_YEARLY, "(by hour of day)", true)
 

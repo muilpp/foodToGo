@@ -69,7 +69,7 @@ func (ns NotificationServiceImpl) sendTelegramMessage(stores []domain.Store, tel
 
 	for _, store := range stores {
 		link := "https://share.toogoodtogo.com/item/" + store.GetItem()
-		msg := tgbotapi.NewMessage(telegramChatId, store.GetName()+": "+link)
+		msg := tgbotapi.NewMessage(telegramChatId, store.GetName()+": "+link, true)
 		_, err2 := bot.Send(msg)
 
 		if err2 != nil {

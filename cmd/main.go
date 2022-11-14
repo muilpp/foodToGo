@@ -24,6 +24,7 @@ var foodApi ports.FoodService
 const STORES_FILE_NAME = "pkg/resources/availableStores.txt"
 const BEARER_FILE_NAME = "pkg/resources/authBearer.txt"
 const REFRESH_TOKEN_FILE_NAME = "pkg/resources/refreshToken.txt"
+const COUNTRIES_FILE_NAME = "pkg/resources/countryTestFile.txt"
 
 func init() {
 	infrastructure.InitLogger()
@@ -34,7 +35,7 @@ func init() {
 	}
 
 	if os.Getenv("DB_USER") == "" {
-		repository = persistance.NewFileRepository(BEARER_FILE_NAME, STORES_FILE_NAME, REFRESH_TOKEN_FILE_NAME)
+		repository = persistance.NewFileRepository(BEARER_FILE_NAME, STORES_FILE_NAME, REFRESH_TOKEN_FILE_NAME, COUNTRIES_FILE_NAME)
 	} else {
 		repository = persistance.NewMysqlRepository(os.Getenv("DB_USER"), os.Getenv("DB_PWD"), os.Getenv("DB_IP"), os.Getenv("DB_NAME"))
 	}

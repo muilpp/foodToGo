@@ -16,10 +16,11 @@ type FileRepository struct {
 	bearerFileName       string
 	storesFileName       string
 	refreshTokenFileName string
+	countryFileName      string
 }
 
-func NewFileRepository(bearerFileName string, storesFileName string, refreshTokenFileName string) *FileRepository {
-	return &FileRepository{bearerFileName: bearerFileName, storesFileName: storesFileName, refreshTokenFileName: refreshTokenFileName}
+func NewFileRepository(bearerFileName string, storesFileName string, refreshTokenFileName string, countryFileName string) *FileRepository {
+	return &FileRepository{bearerFileName: bearerFileName, storesFileName: storesFileName, refreshTokenFileName: refreshTokenFileName, countryFileName: countryFileName}
 }
 
 func (fs *FileRepository) GetBearer() string {
@@ -115,5 +116,12 @@ func (fs *FileRepository) readFile(fileName string) string {
 }
 
 func (fs *FileRepository) GetCountries() []domain.Country {
-	return []domain.Country{}
+	var countries []domain.Country
+	countriesString := strings.Split(fs.readFile(fs.countryFileName), "\n")
+
+	for _, countryString := range countriesString {
+		countries = append(countries, *domain.NewCountry(countryString))
+	}
+
+	return countries
 }

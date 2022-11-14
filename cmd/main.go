@@ -54,31 +54,27 @@ func main() {
 		availableStores := foodApi.GetStoresWithFood()
 
 		if len(availableStores) > 0 {
-			countries := storeService.GetCountries()
-
-			for _, c := range countries {
-				stores := foodApi.FilterStoresByCountry(c.GetName(), availableStores)
-				telegramToken, telegramChatId := getTelegramCredentials(c.GetName())
+			for _, country := range storeService.GetCountries() {
+				stores := foodApi.FilterStoresByCountry(country.GetName(), availableStores)
+				telegramToken, telegramChatId := getTelegramCredentials(country.GetName())
 				notificationService.SendNotification(stores, telegramToken, telegramChatId)
 			}
 		}
 	} else if executionType == "printGraph" {
 		graphService = infrastructure.NewGraphService(repository)
-		countries := storeService.GetCountries()
 
-		for _, c := range countries {
-			graphService.PrintAllMonthlyReports(c.GetName())
-			telegramToken, telegramChatId := getTelegramCredentials(c.GetName())
-			notificationService.SendTelegramMonthlyReports(c.GetName(), telegramToken, telegramChatId)
+		for _, country := range storeService.GetCountries() {
+			graphService.PrintAllMonthlyReports(country.GetName())
+			telegramToken, telegramChatId := getTelegramCredentials(country.GetName())
+			notificationService.SendTelegramMonthlyReports(country.GetName(), telegramToken, telegramChatId)
 		}
 	} else if executionType == "printGraphYear" {
 		graphService = infrastructure.NewGraphService(repository)
-		countries := storeService.GetCountries()
 
-		for _, c := range countries {
-			graphService.PrintAllYearlyReports(c.GetName())
-			telegramToken, telegramChatId := getTelegramCredentials(c.GetName())
-			notificationService.SendTelegramYearReports(c.GetName(), telegramToken, telegramChatId)
+		for _, country := range storeService.GetCountries() {
+			graphService.PrintAllYearlyReports(country.GetName())
+			telegramToken, telegramChatId := getTelegramCredentials(country.GetName())
+			notificationService.SendTelegramYearReports(country.GetName(), telegramToken, telegramChatId)
 		}
 	} else {
 		zap.L().Warn("Wrong argument received in main function ", zap.String("Argument: ", executionType))

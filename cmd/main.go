@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"strconv"
 
 	"github.com/joho/godotenv"
 	"github.com/marc/get-food-to-go/pkg/application/api"
@@ -57,8 +56,7 @@ func main() {
 		if len(availableStores) > 0 {
 			for _, country := range storeService.GetCountries() {
 				stores := foodApi.FilterStoresByCountry(country.GetName(), availableStores)
-				telegramToken, telegramChatId := getTelegramCredentials(country.GetName())
-				notificationService.SendNotification(stores, telegramToken, telegramChatId)
+				notificationService.SendNotification(stores, country.GetName())
 			}
 		}
 	} else if executionType == "printGraph" {
@@ -66,25 +64,16 @@ func main() {
 
 		for _, country := range storeService.GetCountries() {
 			graphService.PrintAllMonthlyReports(country.GetName())
-			telegramToken, telegramChatId := getTelegramCredentials(country.GetName())
-			notificationService.SendTelegramMonthlyReports(country.GetName(), telegramToken, telegramChatId)
+			notificationService.SendTelegramMonthlyReports(country.GetName())
 		}
 	} else if executionType == "printGraphYear" {
 		graphService = infrastructure.NewGraphService(repository)
 
 		for _, country := range storeService.GetCountries() {
 			graphService.PrintAllYearlyReports(country.GetName())
-			telegramToken, telegramChatId := getTelegramCredentials(country.GetName())
-			notificationService.SendTelegramYearReports(country.GetName(), telegramToken, telegramChatId)
+			notificationService.SendTelegramYearReports(country.GetName())
 		}
 	} else {
 		zap.L().Warn("Wrong argument received in main function ", zap.String("Argument: ", executionType))
 	}
-}
-
-func getTelegramCredentials(countryCode string) (string, int64) {
-	telegramToken := os.Getenv("TELEGRAM_API_TOKEN_" + countryCode)
-	telegramChatId, _ := strconv.ParseInt(os.Getenv("TELEGRAM_CHAT_ID_"+countryCode), 10, 64)
-
-	return telegramToken, telegramChatId
 }

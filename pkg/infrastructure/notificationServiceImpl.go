@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -54,18 +55,9 @@ func (ns NotificationServiceImpl) sendMail(stores []domain.Store) {
 	}
 }
 
-func (ns NotificationServiceImpl) sendTelegramMessage(stores []domain.Store, telegramToken string, telegramChatId int64) {
+func (ns NotificationServiceImpl) sendTelegramMessage(stores []domain.Store, countryName string) {
 
-	if telegramToken == "" || telegramChatId == 0 {
-		return
-	}
-
-	bot, err := tgbotapi.NewBotAPI(telegramToken)
-	bot.Debug = true
-
-	if err != nil {
-		zap.L().Panic("Could not get telegram API instance", zap.Error(err))
-	}
+	telegramChatId, bot := getTelegramCredentials(countryName)
 
 	for _, store := range stores {
 		link := "https://share.toogoodtogo.com/item/" + store.GetItem()
@@ -79,8 +71,8 @@ func (ns NotificationServiceImpl) sendTelegramMessage(stores []domain.Store, tel
 
 }
 
-func (ns NotificationServiceImpl) SendTelegramMonthlyReports(countryCode string, telegramToken string, telegramChatId int64) {
-	telegramChatId, bot := getTelegramCredentials(countryCode, telegramToken, telegramChatId)
+func (ns NotificationServiceImpl) SendTelegramMonthlyReports(countryCode string) {
+	telegramChatId, bot := getTelegramCredentials(countryCode)
 
 	fileDir, _ := os.Getwd()
 	ns.sendFile(countryCode+ports.FOOD_CHART_BY_STORE_MONTHLY, bot, fileDir, telegramChatId)
@@ -88,8 +80,8 @@ func (ns NotificationServiceImpl) SendTelegramMonthlyReports(countryCode string,
 	ns.sendFile(countryCode+ports.FOOD_CHART_BY_HOUR_OF_DAY_MONTHLY, bot, fileDir, telegramChatId)
 }
 
-func (ns NotificationServiceImpl) SendTelegramYearReports(countryCode string, telegramToken string, telegramChatId int64) {
-	telegramChatId, bot := getTelegramCredentials(countryCode, telegramToken, telegramChatId)
+func (ns NotificationServiceImpl) SendTelegramYearReports(countryCode string) {
+	telegramChatId, bot := getTelegramCredentials(countryCode)
 
 	fileDir, _ := os.Getwd()
 	ns.sendFile(countryCode+ports.FOOD_CHART_BY_STORE_YEARLY, bot, fileDir, telegramChatId)
@@ -97,7 +89,10 @@ func (ns NotificationServiceImpl) SendTelegramYearReports(countryCode string, te
 	ns.sendFile(countryCode+ports.FOOD_CHART_BY_HOUR_OF_DAY_YEARLY, bot, fileDir, telegramChatId)
 }
 
-func getTelegramCredentials(countryCode string, telegramToken string, telegramChatId int64) (int64, *tgbotapi.BotAPI) {
+func getTelegramCredentials(countryCode string) (int64, *tgbotapi.BotAPI) {
+
+	telegramToken := os.Getenv("TELEGRAM_API_TOKEN_" + countryCode)
+	telegramChatId, _ := strconv.ParseInt(os.Getenv("TELEGRAM_CHAT_ID_"+countryCode), 10, 64)
 
 	if telegramToken == "" || telegramChatId == 0 {
 		zap.L().Panic("Got empty telegram credentials")
@@ -124,9 +119,9 @@ func (ns NotificationServiceImpl) sendFile(fileName string, bot *tgbotapi.BotAPI
 	}
 }
 
-func (ns NotificationServiceImpl) SendNotification(stores []domain.Store, telegramToken string, telegramChatId int64) {
+func (ns NotificationServiceImpl) SendNotification(stores []domain.Store, countryCode string) {
 	if len(stores) > 0 {
 		ns.sendMail(stores)
-		ns.sendTelegramMessage(stores, telegramToken, telegramChatId)
+		ns.sendTelegramMessage(stores, countryCode)
 	}
 }

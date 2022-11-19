@@ -155,13 +155,14 @@ func (foodApi FoodApiImpl) FilterStoresByCountry(countryCode string, availableSt
 		}
 	}
 
-	storesString := strings.Join(application.StoresToString(stores), ", ")
-
 	if len(stores) > 0 {
-		zap.L().Info("Found shop(s): " + storesString)
-		foodApi.storeService.AddStores(stores)
+		foodApi.AddStores(stores)
 		return stores
 	}
 
 	return []domain.Store{}
+}
+
+func (foodApi FoodApiImpl) AddStores(stores []domain.Store) {
+	foodApi.storeService.AddStores(stores)
 }

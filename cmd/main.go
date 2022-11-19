@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 	"github.com/marc/get-food-to-go/pkg/application"
@@ -56,6 +57,9 @@ func main() {
 		var countryLessShops []domain.Store
 
 		if len(availableStores) > 0 {
+			storesString := strings.Join(application.StoresToString(availableStores), ", ")
+			zap.L().Info("Found shop(s): " + storesString)
+
 			countries := storeService.GetCountries()
 			for _, country := range countries {
 				stores := foodApi.FilterStoresByCountry(country.GetName(), availableStores)
@@ -70,6 +74,7 @@ func main() {
 
 		if len(countryLessShops) > 0 {
 			notificationService.SendNotification(countryLessShops, "")
+			foodApi.AddStores(countryLessShops)
 		}
 	} else if executionType == "printGraph" {
 		graphService = infrastructure.NewGraphService(repository)

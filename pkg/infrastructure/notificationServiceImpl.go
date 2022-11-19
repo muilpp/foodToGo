@@ -91,8 +91,8 @@ func (ns NotificationServiceImpl) SendTelegramYearReports(countryCode string) {
 
 func getTelegramCredentials(countryCode string) (int64, *tgbotapi.BotAPI) {
 
-	telegramToken := os.Getenv("TELEGRAM_API_TOKEN_" + countryCode)
-	telegramChatId, _ := strconv.ParseInt(os.Getenv("TELEGRAM_CHAT_ID_"+countryCode), 10, 64)
+	telegramToken := os.Getenv("TELEGRAM_API_TOKEN" + countryCode)
+	telegramChatId, _ := strconv.ParseInt(os.Getenv("TELEGRAM_CHAT_ID"+countryCode), 10, 64)
 
 	if telegramToken == "" || telegramChatId == 0 {
 		zap.L().Panic("Got empty telegram credentials")

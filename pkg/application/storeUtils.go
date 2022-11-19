@@ -44,3 +44,23 @@ func StoresContainStoreName(stores []domain.Store, storeName string) bool {
 
 	return false
 }
+
+func RemoveStoresFromSlice(originalStores []domain.Store, storesToRemove []domain.Store) []domain.Store {
+	var updatedStores []domain.Store
+
+	for _, os := range originalStores {
+		removeStore := false
+		for _, sr := range storesToRemove {
+
+			if os.GetName() == sr.GetName() {
+				removeStore = true
+			}
+		}
+
+		if !removeStore {
+			updatedStores = append(updatedStores, os)
+		}
+	}
+
+	return updatedStores
+}

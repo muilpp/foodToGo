@@ -4,7 +4,9 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/marc/get-food-to-go/pkg/application"
 	"github.com/marc/get-food-to-go/pkg/application/api"
+	"github.com/marc/get-food-to-go/pkg/domain"
 	"github.com/marc/get-food-to-go/pkg/domain/ports"
 	"github.com/marc/get-food-to-go/pkg/infrastructure"
 	"github.com/marc/get-food-to-go/pkg/infrastructure/persistance"
@@ -40,7 +42,6 @@ func init() {
 	}
 
 	storeService = ports.NewStoreService(repository)
-
 	authService = api.NewFoodApiAuth(storeService)
 	tokenService = api.NewFoodApiAuth(storeService)
 	notificationService = infrastructure.NewNotificationService()
@@ -52,12 +53,23 @@ func main() {
 
 	if executionType == "getFood" {
 		availableStores := foodApi.GetStoresWithFood()
+		var countryLessShops []domain.Store
 
 		if len(availableStores) > 0 {
-			for _, country := range storeService.GetCountries() {
+			countries := storeService.GetCountries()
+			for _, country := range countries {
 				stores := foodApi.FilterStoresByCountry(country.GetName(), availableStores)
-				notificationService.SendNotification(stores, country.GetName())
+				notificationService.SendNotification(stores, "_"+country.GetName())
+				countryLessShops = append(countryLessShops, application.RemoveStoresFromSlice(availableStores, stores)...)
 			}
+
+			if len(countries) == 0 {
+				countryLessShops = availableStores
+			}
+		}
+
+		if len(countryLessShops) > 0 {
+			notificationService.SendNotification(countryLessShops, "")
 		}
 	} else if executionType == "printGraph" {
 		graphService = infrastructure.NewGraphService(repository)

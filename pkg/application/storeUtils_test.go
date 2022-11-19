@@ -50,3 +50,14 @@ func TestStoreSliceContainsStoreName(t *testing.T) {
 	assert.True(t, StoresContainStoreName(stores, "Candy shop"))
 	assert.False(t, StoresContainStoreName(stores, "Random shop"))
 }
+
+func TestRemoveStoresFromSlice(t *testing.T) {
+	originalStores := []domain.Store{*domain.NewStore("Meat shop", "ES", "", 1, time.Now()), *domain.NewStore("Fish shop", "FR", "", 2, time.Now()), *domain.NewStore("Candy shop", "IT", "", 3, time.Now())}
+	storesToRemove := []domain.Store{*domain.NewStore("Fish shop", "FR", "", 2, time.Now())}
+
+	stores := RemoveStoresFromSlice(originalStores, storesToRemove)
+
+	assert.Equal(t, 2, len(stores))
+	assert.Equal(t, "Meat shop", stores[0].GetName())
+	assert.Equal(t, "Candy shop", stores[1].GetName())
+}

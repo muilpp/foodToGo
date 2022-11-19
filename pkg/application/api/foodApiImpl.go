@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/marc/get-food-to-go/pkg/application"
 	"github.com/marc/get-food-to-go/pkg/domain"
@@ -136,11 +137,32 @@ func (foodApi FoodApiImpl) checkStoresInResponse(response domain.FoodJson) []dom
 			}
 
 			if !application.StoresContainStoreName(storesInFile, storeName) {
-				store := domain.NewStore(storeName, item.Store.StoreLocation.Address.Country.IsoCode, item.ItemsAvailable)
+				store := domain.NewStore(storeName, item.Store.StoreLocation.Address.Country.IsoCode, item.Item.ItemID, item.ItemsAvailable, time.Now())
 				stores = append(stores, *store)
 			}
 		}
 	}
 
 	return stores
+}
+
+func (foodApi FoodApiImpl) FilterStoresByCountry(countryCode string, availableStores []domain.Store) []domain.Store {
+	var stores []domain.Store
+
+	for _, store := range availableStores {
+		if store.GetCountry() == countryCode {
+			stores = append(stores, store)
+		}
+	}
+
+	if len(stores) > 0 {
+		foodApi.AddStores(stores)
+		return stores
+	}
+
+	return []domain.Store{}
+}
+
+func (foodApi FoodApiImpl) AddStores(stores []domain.Store) {
+	foodApi.storeService.AddStores(stores)
 }

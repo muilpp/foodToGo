@@ -11,7 +11,8 @@ import (
 
 type StoreTable struct {
 	gorm.Model
-	Store string
+	Store       string
+	CountryCode string
 }
 
 type Result struct {
@@ -29,8 +30,13 @@ type RefreshTokenTable struct {
 	Token string
 }
 
-func NewStoreTable(storeName string) *StoreTable {
-	return &StoreTable{Store: storeName}
+type CountryTable struct {
+	gorm.Model
+	Country string
+}
+
+func NewStoreTable(storeName string, countryCode string) *StoreTable {
+	return &StoreTable{Store: storeName, CountryCode: countryCode}
 }
 
 func intialMigration(user string, pwd string, ip string, database string) {
@@ -43,6 +49,7 @@ func intialMigration(user string, pwd string, ip string, database string) {
 	db.AutoMigrate(&StoreTable{})
 	db.AutoMigrate(&BearerTable{})
 	db.AutoMigrate(&RefreshTokenTable{})
+	db.AutoMigrate(&CountryTable{})
 }
 
 type MysqlRepository struct {
@@ -90,6 +97,15 @@ func (db *MysqlRepository) GetRefreshToken() string {
 	return refreshToken.Token
 }
 
+func (db *MysqlRepository) GetCountries() []domain.Country {
+	database := openConnection(db.user, db.pwd, db.ip, db.database)
+
+	var countries []CountryTable
+	database.Find(&countries)
+
+	return CountryTableToCountryObject(countries)
+}
+
 func (db *MysqlRepository) UpdateRefreshToken(newToken string) {
 	currentToken := db.GetRefreshToken()
 	database := openConnection(db.user, db.pwd, db.ip, db.database)
@@ -115,32 +131,33 @@ func (db *MysqlRepository) GetStores() []domain.Store {
 	return StoreTablesToStoreObjects(stores)
 }
 
-func (db *MysqlRepository) GetStoresByTimesAppeared(frequency string) []domain.StoreCounter {
+func (db *MysqlRepository) GetStoresByTimesAppeared(frequency string, countryCode string) []domain.StoreCounter {
 	database := openConnection(db.user, db.pwd, db.ip, db.database)
 
 	var stores []StoreTable
 	var result []Result
-	database.Model(&stores).Select("store as element, count(store) as total").Where("created_at > ?", frequency).Group("store").Order("total").Find(&result)
+
+	database.Model(&stores).Select("store as element, count(store) as total").Where("created_at > ? AND country_code = ?", frequency, countryCode).Group("store").Order("total").Find(&result)
 
 	return StoreTableCountResultsToStoreCounterObjects(result)
 }
 
-func (db *MysqlRepository) GetStoresByDayOfWeek(frequency string) []domain.StoreCounter {
+func (db *MysqlRepository) GetStoresByDayOfWeek(frequency string, countryCode string) []domain.StoreCounter {
 	database := openConnection(db.user, db.pwd, db.ip, db.database)
 
 	var stores []StoreTable
 	var result []Result
-	database.Model(&stores).Select("DAYNAME(CREATED_AT) as element, COUNT(CREATED_AT) as total").Where("created_at > ?", frequency).Group("DAYNAME(CREATED_AT)").Order("total").Find(&result)
+	database.Model(&stores).Select("DAYNAME(CREATED_AT) as element, COUNT(CREATED_AT) as total").Where("created_at > ? AND country_code = ?", frequency, countryCode).Group("DAYNAME(CREATED_AT)").Order("total").Find(&result)
 
 	return StoreTableCountResultsToStoreCounterObjects(result)
 }
 
-func (db *MysqlRepository) GetStoresByHourOfDay(frequency string) []domain.StoreCounter {
+func (db *MysqlRepository) GetStoresByHourOfDay(frequency string, countryCode string) []domain.StoreCounter {
 	database := openConnection(db.user, db.pwd, db.ip, db.database)
 
 	var stores []StoreTable
 	var result []Result
-	database.Model(&stores).Select("HOUR(CREATED_AT) as element, COUNT(CREATED_AT) as total").Where("created_at > ?", frequency).Group("HOUR(CREATED_AT)").Order("total").Find(&result)
+	database.Model(&stores).Select("HOUR(CREATED_AT) as element, COUNT(CREATED_AT) as total").Where("created_at > ? AND country_code = ?", frequency, countryCode).Group("HOUR(CREATED_AT)").Order("total").Find(&result)
 
 	return StoreTableCountResultsToStoreCounterObjects(result)
 }

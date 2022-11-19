@@ -1,7 +1,7 @@
 test:
 	go test -v .././...
 
-compile:
+compile: test
 	echo "Compiling for Linux, Mac and Win"
 	GOOS=linux go build -o ../bin/food2GoLinux;
 	GOOS=linux GOARCH=arm GOARM=5 go build -o ../bin/food2GoRpi;

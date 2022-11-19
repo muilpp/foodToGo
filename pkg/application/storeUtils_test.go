@@ -2,13 +2,14 @@ package application
 
 import (
 	"testing"
+	"time"
 
 	"github.com/marc/get-food-to-go/pkg/domain"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestStoreIsConvertedToString(t *testing.T) {
-	store := domain.NewStore("Meat shop", "ES", 1)
+	store := domain.NewStore("Meat shop", "ES", "", 1, time.Now())
 	stringStore := StoreToString(*store)
 
 	assert.Equal(t, "Meat shop", stringStore)
@@ -16,7 +17,7 @@ func TestStoreIsConvertedToString(t *testing.T) {
 
 func TestStoreSliceIsConvertedToStringSlice(t *testing.T) {
 
-	stores := []domain.Store{*domain.NewStore("Meat shop", "ES", 1), *domain.NewStore("Fish shop", "FR", 2)}
+	stores := []domain.Store{*domain.NewStore("Meat shop", "ES", "", 1, time.Now()), *domain.NewStore("Fish shop", "FR", "", 2, time.Now())}
 	stringStores := StoresToString(stores)
 
 	assert.Equal(t, 2, len(stringStores))
@@ -25,7 +26,7 @@ func TestStoreSliceIsConvertedToStringSlice(t *testing.T) {
 }
 
 func TestStringIsConvertedToStore(t *testing.T) {
-	store := StringToStore("Meat shop", "ES", 1)
+	store := StringToStore("Meat shop", "ES", 1, time.Now())
 
 	assert.Equal(t, "Meat shop", store.GetName())
 	assert.Equal(t, "ES", store.GetCountry())
@@ -42,10 +43,21 @@ func TestStringSliceIsConvertedToStoreSlice(t *testing.T) {
 }
 
 func TestStoreSliceContainsStoreName(t *testing.T) {
-	stores := []domain.Store{*domain.NewStore("Meat shop", "ES", 1), *domain.NewStore("Fish shop", "FR", 2), *domain.NewStore("Candy shop", "IT", 3)}
+	stores := []domain.Store{*domain.NewStore("Meat shop", "ES", "", 1, time.Now()), *domain.NewStore("Fish shop", "FR", "", 2, time.Now()), *domain.NewStore("Candy shop", "IT", "", 3, time.Now())}
 
 	assert.True(t, StoresContainStoreName(stores, "Meat shop"))
 	assert.True(t, StoresContainStoreName(stores, "Fish shop"))
 	assert.True(t, StoresContainStoreName(stores, "Candy shop"))
 	assert.False(t, StoresContainStoreName(stores, "Random shop"))
+}
+
+func TestRemoveStoresFromSlice(t *testing.T) {
+	originalStores := []domain.Store{*domain.NewStore("Meat shop", "ES", "", 1, time.Now()), *domain.NewStore("Fish shop", "FR", "", 2, time.Now()), *domain.NewStore("Candy shop", "IT", "", 3, time.Now())}
+	storesToRemove := []domain.Store{*domain.NewStore("Fish shop", "FR", "", 2, time.Now())}
+
+	stores := RemoveStoresFromSlice(originalStores, storesToRemove)
+
+	assert.Equal(t, 2, len(stores))
+	assert.Equal(t, "Meat shop", stores[0].GetName())
+	assert.Equal(t, "Candy shop", stores[1].GetName())
 }

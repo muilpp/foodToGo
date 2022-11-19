@@ -11,6 +11,7 @@ type StoreService interface {
 	UpdateRefreshToken(token string)
 	GetStores() []domain.Store
 	AddStores(stores []domain.Store)
+	GetCountries() []domain.Country
 }
 
 type Repository interface {
@@ -19,10 +20,11 @@ type Repository interface {
 	GetRefreshToken() string
 	UpdateRefreshToken(token string)
 	GetStores() []domain.Store
-	GetStoresByTimesAppeared(frequency string) []domain.StoreCounter
-	GetStoresByDayOfWeek(frequency string) []domain.StoreCounter
-	GetStoresByHourOfDay(frequency string) []domain.StoreCounter
+	GetStoresByTimesAppeared(frequency string, countryCode string) []domain.StoreCounter
+	GetStoresByDayOfWeek(frequency string, countryCode string) []domain.StoreCounter
+	GetStoresByHourOfDay(frequency string, countryCode string) []domain.StoreCounter
 	AddStores(stores []domain.Store)
+	GetCountries() []domain.Country
 }
 
 type storeService struct {
@@ -55,4 +57,8 @@ func (s storeService) GetStores() []domain.Store {
 
 func (s storeService) AddStores(stores []domain.Store) {
 	s.repository.AddStores(stores)
+}
+
+func (s storeService) GetCountries() []domain.Country {
+	return s.repository.GetCountries()
 }

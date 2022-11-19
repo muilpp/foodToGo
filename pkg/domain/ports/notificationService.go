@@ -1,8 +1,9 @@
 package ports
 
+import "github.com/marc/get-food-to-go/pkg/domain"
+
 type NotificationService interface {
-	SendMail(message string)
-	SendTelegramMessage(message string)
-	SendTelegramMonthlyReports()
-	SendTelegramYearReports()
+	SendNotification(stores []domain.Store, countryName string)
+	SendTelegramMonthlyReports(countryCode string)
+	SendTelegramYearReports(countryCode string)
 }

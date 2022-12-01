@@ -125,3 +125,9 @@ func (fs *FileRepository) GetCountries() []domain.Country {
 
 	return countries
 }
+
+func (fs *FileRepository) GetCountryCodes() []string {
+	var countries []string
+
+	return countries
+}

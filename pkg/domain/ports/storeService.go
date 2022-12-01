@@ -12,6 +12,7 @@ type StoreService interface {
 	GetStores() []domain.Store
 	AddStores(stores []domain.Store)
 	GetCountries() []domain.Country
+	GetCountryCodes() []string
 }
 
 type Repository interface {
@@ -25,6 +26,7 @@ type Repository interface {
 	GetStoresByHourOfDay(frequency string, countryCode string) []domain.StoreCounter
 	AddStores(stores []domain.Store)
 	GetCountries() []domain.Country
+	GetCountryCodes() []string
 }
 
 type storeService struct {
@@ -61,4 +63,8 @@ func (s storeService) AddStores(stores []domain.Store) {
 
 func (s storeService) GetCountries() []domain.Country {
 	return s.repository.GetCountries()
+}
+
+func (s storeService) GetCountryCodes() []string {
+	return s.repository.GetCountryCodes()
 }

@@ -9,11 +9,11 @@ compile: test
 	GOOS=windows GOARCH=amd64 go build -o ../bin/food2GoWindows;
 
 deploy:
-	scp /home/marc/workspace/marc/get-food-to-go/bin/food2GoLinux marc-digital-ocean:/home/marc/foodToGo/
+	scp /home/marc/workspace/foodToGo/bin/food2GoRpi rpi-mirall:/home/pi/foodToGo/
 
 get-food:
 	test compile
 	pwd
 	cd .. && ./bin/food2GoLinux getFood
 
-all: test compile
+all: test compile deploy

@@ -162,6 +162,16 @@ func (db *MysqlRepository) GetStoresByHourOfDay(frequency string, countryCode st
 	return StoreTableCountResultsToStoreCounterObjects(result)
 }
 
+func (db *MysqlRepository) GetCountryCodes() []string {
+	database := openConnection(db.user, db.pwd, db.ip, db.database)
+
+	var stores []StoreTable
+	var countries []string
+	database.Model(&stores).Distinct().Pluck("country_code", &countries)
+
+	return countries
+}
+
 func (db *MysqlRepository) AddStores(stores []domain.Store) {
 	database := openConnection(db.user, db.pwd, db.ip, db.database)
 	database.CreateInBatches(StoreObjectsToStoreTables(stores), 10)

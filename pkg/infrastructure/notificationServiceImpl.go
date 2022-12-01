@@ -68,25 +68,34 @@ func (ns NotificationServiceImpl) sendTelegramMessage(stores []domain.Store, cou
 			zap.L().Error("Message not sent", zap.Error(err2))
 		}
 	}
-
 }
 
-func (ns NotificationServiceImpl) SendTelegramMonthlyReports(countryCode string) {
-	telegramChatId, bot := getTelegramCredentials(countryCode)
-
-	fileDir, _ := os.Getwd()
-	ns.sendFile(countryCode+ports.FOOD_CHART_BY_STORE_MONTHLY, bot, fileDir, telegramChatId)
-	ns.sendFile(countryCode+ports.FOOD_CHART_BY_DAY_OF_WEEK_MONTHLY, bot, fileDir, telegramChatId)
-	ns.sendFile(countryCode+ports.FOOD_CHART_BY_HOUR_OF_DAY_MONTHLY, bot, fileDir, telegramChatId)
+func (ns NotificationServiceImpl) SendTelegramMonthlyReportsDeclaredCountry(countryCode string) {
+	ns.SendTelegramMonthlyReports(countryCode, countryCode)
 }
 
-func (ns NotificationServiceImpl) SendTelegramYearReports(countryCode string) {
-	telegramChatId, bot := getTelegramCredentials(countryCode)
+func (ns NotificationServiceImpl) SendTelegramMonthlyReports(telegramCountryCode string, fileCountryCode string) {
+	telegramChatId, bot := getTelegramCredentials(telegramCountryCode)
 
 	fileDir, _ := os.Getwd()
-	ns.sendFile(countryCode+ports.FOOD_CHART_BY_STORE_YEARLY, bot, fileDir, telegramChatId)
-	ns.sendFile(countryCode+ports.FOOD_CHART_BY_DAY_OF_WEEK_YEARLY, bot, fileDir, telegramChatId)
-	ns.sendFile(countryCode+ports.FOOD_CHART_BY_HOUR_OF_DAY_YEARLY, bot, fileDir, telegramChatId)
+	fileCountryCode = strings.Replace(fileCountryCode, "_", "", 1)
+	ns.sendFile(fileCountryCode+ports.FOOD_CHART_BY_STORE_MONTHLY, bot, fileDir, telegramChatId)
+	ns.sendFile(fileCountryCode+ports.FOOD_CHART_BY_DAY_OF_WEEK_MONTHLY, bot, fileDir, telegramChatId)
+	ns.sendFile(fileCountryCode+ports.FOOD_CHART_BY_HOUR_OF_DAY_MONTHLY, bot, fileDir, telegramChatId)
+}
+
+func (ns NotificationServiceImpl) SendTelegramYearReportsDeclaredCountry(countryCode string) {
+	ns.SendTelegramYearReports(countryCode, countryCode)
+}
+
+func (ns NotificationServiceImpl) SendTelegramYearReports(telegramCountryCode string, fileCountryCode string) {
+	telegramChatId, bot := getTelegramCredentials(telegramCountryCode)
+
+	fileDir, _ := os.Getwd()
+	fileCountryCode = strings.Replace(fileCountryCode, "_", "", 1)
+	ns.sendFile(fileCountryCode+ports.FOOD_CHART_BY_STORE_YEARLY, bot, fileDir, telegramChatId)
+	ns.sendFile(fileCountryCode+ports.FOOD_CHART_BY_DAY_OF_WEEK_YEARLY, bot, fileDir, telegramChatId)
+	ns.sendFile(fileCountryCode+ports.FOOD_CHART_BY_HOUR_OF_DAY_YEARLY, bot, fileDir, telegramChatId)
 }
 
 func getTelegramCredentials(countryCode string) (int64, *tgbotapi.BotAPI) {
@@ -95,7 +104,7 @@ func getTelegramCredentials(countryCode string) (int64, *tgbotapi.BotAPI) {
 	telegramChatId, _ := strconv.ParseInt(os.Getenv("TELEGRAM_CHAT_ID"+countryCode), 10, 64)
 
 	if telegramToken == "" || telegramChatId == 0 {
-		zap.L().Panic("Got empty telegram credentials")
+		zap.L().Panic("Got empty telegram credentials for country: " + countryCode)
 	}
 
 	bot, err := tgbotapi.NewBotAPI(telegramToken)
@@ -115,7 +124,7 @@ func (ns NotificationServiceImpl) sendFile(fileName string, bot *tgbotapi.BotAPI
 	_, err2 := bot.Send(msg)
 
 	if err2 != nil {
-		zap.L().Error("Document not sent", zap.Error(err2))
+		zap.L().Error("Document "+fileName+" not sent", zap.Error(err2))
 	}
 }
 

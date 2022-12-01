@@ -12,6 +12,7 @@ import (
 	"github.com/marc/get-food-to-go/pkg/infrastructure"
 	"github.com/marc/get-food-to-go/pkg/infrastructure/persistance"
 	"go.uber.org/zap"
+	"golang.org/x/exp/slices"
 )
 
 var storeService ports.StoreService
@@ -78,19 +79,43 @@ func main() {
 		}
 	} else if executionType == "printGraph" {
 		graphService = infrastructure.NewGraphService(repository)
+		var definedCountries []string
 
+		//Print and send all countries defined in the database
 		for _, country := range storeService.GetCountries() {
 			graphService.PrintAllMonthlyReports(country.GetName())
-			notificationService.SendTelegramMonthlyReports(country.GetName())
+			notificationService.SendTelegramMonthlyReportsDeclaredCountry("_" + country.GetName())
+			definedCountries = append(definedCountries, country.GetName())
 		}
+
+		//Print and send all countries not defined in the database
+		for _, countryCode := range storeService.GetCountryCodes() {
+			if !slices.Contains(definedCountries, countryCode) {
+				graphService.PrintAllMonthlyReports(countryCode)
+				notificationService.SendTelegramMonthlyReports("", countryCode)
+			}
+		}
+
 	} else if executionType == "printGraphYear" {
 		graphService = infrastructure.NewGraphService(repository)
+		var definedCountries []string
 
+		//Print and send all countries defined in the database
 		for _, country := range storeService.GetCountries() {
 			graphService.PrintAllYearlyReports(country.GetName())
-			notificationService.SendTelegramYearReports(country.GetName())
+			notificationService.SendTelegramYearReportsDeclaredCountry("_" + country.GetName())
+			definedCountries = append(definedCountries, country.GetName())
 		}
+
+		//Print and send all countries not defined in the database
+		for _, countryCode := range storeService.GetCountryCodes() {
+			if !slices.Contains(definedCountries, countryCode) {
+				graphService.PrintAllYearlyReports(countryCode)
+				notificationService.SendTelegramYearReports("", countryCode)
+			}
+		}
+
 	} else {
-		zap.L().Warn("Wrong argument received in main function ", zap.String("Argument: ", executionType))
+		zap.L().Warn("Wrong argument received in main functcountriesion ", zap.String("Argument: ", executionType))
 	}
 }

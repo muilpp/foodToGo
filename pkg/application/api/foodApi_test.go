@@ -72,6 +72,10 @@ func (fs RepositoryMock) GetCountries() []domain.Country {
 	return []domain.Country{}
 }
 
+func (fs RepositoryMock) GetCountryCodes() []string {
+	return []string{}
+}
+
 func TestStoresResponseParse(t *testing.T) {
 	response := []byte("{\"items\":[{\"item\":{\"item_id\":\"796374\",\"name\":\"Abendbuffet\"},\"store\":{\"store_id\":\"768562\",\"store_name\":\"Villa Wow - Berlin\"},\"display_name\":\"Villa Wow - Berlin\",\"items_available\":3},{\"item\":{\"item_id\":\"796374\",\"name\":\"Entrepans\"},\"store\":{\"store_id\":\"768562\",\"store_name\":\"Mini Golf\"},\"display_name\":\"Mini Golf\",\"items_available\":2}]}")
 	responseStruct := parseJsonResponse(response)

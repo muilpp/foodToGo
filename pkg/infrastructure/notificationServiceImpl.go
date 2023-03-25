@@ -55,9 +55,9 @@ func (ns NotificationServiceImpl) sendMail(stores []domain.Store) {
 	}
 }
 
-func (ns NotificationServiceImpl) sendTelegramMessage(stores []domain.Store, countryName string) {
+func (ns NotificationServiceImpl) sendTelegramMessage(stores []domain.Store) {
 
-	telegramChatId, bot := getTelegramCredentials(countryName)
+	telegramChatId, bot := getTelegramCredentials()
 
 	for _, store := range stores {
 		link := "https://share.toogoodtogo.com/item/" + store.GetItem()
@@ -70,41 +70,31 @@ func (ns NotificationServiceImpl) sendTelegramMessage(stores []domain.Store, cou
 	}
 }
 
-func (ns NotificationServiceImpl) SendTelegramMonthlyReportsDeclaredCountry(countryCode string) {
-	ns.SendTelegramMonthlyReports(countryCode, countryCode)
-}
-
-func (ns NotificationServiceImpl) SendTelegramMonthlyReports(telegramCountryCode string, fileCountryCode string) {
-	telegramChatId, bot := getTelegramCredentials(telegramCountryCode)
+func (ns NotificationServiceImpl) SendTelegramMonthlyReports() {
+	telegramChatId, bot := getTelegramCredentials()
 
 	fileDir, _ := os.Getwd()
-	fileCountryCode = strings.Replace(fileCountryCode, "_", "", 1)
-	ns.sendFile(fileCountryCode+ports.FOOD_CHART_BY_STORE_MONTHLY, bot, fileDir, telegramChatId)
-	ns.sendFile(fileCountryCode+ports.FOOD_CHART_BY_DAY_OF_WEEK_MONTHLY, bot, fileDir, telegramChatId)
-	ns.sendFile(fileCountryCode+ports.FOOD_CHART_BY_HOUR_OF_DAY_MONTHLY, bot, fileDir, telegramChatId)
+	ns.sendFile(ports.FOOD_CHART_BY_STORE_MONTHLY, bot, fileDir, telegramChatId)
+	ns.sendFile(ports.FOOD_CHART_BY_DAY_OF_WEEK_MONTHLY, bot, fileDir, telegramChatId)
+	ns.sendFile(ports.FOOD_CHART_BY_HOUR_OF_DAY_MONTHLY, bot, fileDir, telegramChatId)
 }
 
-func (ns NotificationServiceImpl) SendTelegramYearReportsDeclaredCountry(countryCode string) {
-	ns.SendTelegramYearReports(countryCode, countryCode)
-}
-
-func (ns NotificationServiceImpl) SendTelegramYearReports(telegramCountryCode string, fileCountryCode string) {
-	telegramChatId, bot := getTelegramCredentials(telegramCountryCode)
+func (ns NotificationServiceImpl) SendTelegramYearReports() {
+	telegramChatId, bot := getTelegramCredentials()
 
 	fileDir, _ := os.Getwd()
-	fileCountryCode = strings.Replace(fileCountryCode, "_", "", 1)
-	ns.sendFile(fileCountryCode+ports.FOOD_CHART_BY_STORE_YEARLY, bot, fileDir, telegramChatId)
-	ns.sendFile(fileCountryCode+ports.FOOD_CHART_BY_DAY_OF_WEEK_YEARLY, bot, fileDir, telegramChatId)
-	ns.sendFile(fileCountryCode+ports.FOOD_CHART_BY_HOUR_OF_DAY_YEARLY, bot, fileDir, telegramChatId)
+	ns.sendFile(ports.FOOD_CHART_BY_STORE_YEARLY, bot, fileDir, telegramChatId)
+	ns.sendFile(ports.FOOD_CHART_BY_DAY_OF_WEEK_YEARLY, bot, fileDir, telegramChatId)
+	ns.sendFile(ports.FOOD_CHART_BY_HOUR_OF_DAY_YEARLY, bot, fileDir, telegramChatId)
 }
 
-func getTelegramCredentials(countryCode string) (int64, *tgbotapi.BotAPI) {
+func getTelegramCredentials() (int64, *tgbotapi.BotAPI) {
 
-	telegramToken := os.Getenv("TELEGRAM_API_TOKEN" + countryCode)
-	telegramChatId, _ := strconv.ParseInt(os.Getenv("TELEGRAM_CHAT_ID"+countryCode), 10, 64)
+	telegramToken := os.Getenv("TELEGRAM_API_TOKEN")
+	telegramChatId, _ := strconv.ParseInt(os.Getenv("TELEGRAM_CHAT_ID"), 10, 64)
 
 	if telegramToken == "" || telegramChatId == 0 {
-		zap.L().Panic("Got empty telegram credentials for country: " + countryCode)
+		zap.L().Panic("Got empty telegram credentials")
 	}
 
 	bot, err := tgbotapi.NewBotAPI(telegramToken)
@@ -128,9 +118,9 @@ func (ns NotificationServiceImpl) sendFile(fileName string, bot *tgbotapi.BotAPI
 	}
 }
 
-func (ns NotificationServiceImpl) SendNotification(stores []domain.Store, countryCode string) {
+func (ns NotificationServiceImpl) SendNotification(stores []domain.Store) {
 	if len(stores) > 0 {
 		ns.sendMail(stores)
-		ns.sendTelegramMessage(stores, countryCode)
+		ns.sendTelegramMessage(stores)
 	}
 }

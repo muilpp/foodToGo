@@ -33,7 +33,7 @@ func newRepositoryMock(bearerFile string, storeFile string) RepositoryMock {
 		bearerFile: bearerFile,
 		storeFile:  storeFile,
 		ReadStoresFromFileMock: func() []domain.Store {
-			return []domain.Store{*domain.NewStore("Osakii - Mainz - Abendbuffet", "DE", "", 1, time.Now())}
+			return []domain.Store{*domain.NewStore("Osakii - Mainz - Abendbuffet", "", 1, time.Now())}
 		},
 	}
 }
@@ -66,14 +66,6 @@ func (fs RepositoryMock) GetRefreshToken() string {
 func (fs RepositoryMock) UpdateRefreshToken(bearer string) {}
 
 func (fs RepositoryMock) AddStores(stores []domain.Store) {
-}
-
-func (fs RepositoryMock) GetCountries() []domain.Country {
-	return []domain.Country{}
-}
-
-func (fs RepositoryMock) GetCountryCodes() []string {
-	return []string{}
 }
 
 func TestStoresResponseParse(t *testing.T) {

@@ -137,7 +137,7 @@ func (foodApi FoodApiImpl) checkStoresInResponse(response domain.FoodJson) []dom
 			}
 
 			if !application.StoresContainStoreName(storesInFile, storeName) {
-				store := domain.NewStore(storeName, item.Store.StoreLocation.Address.Country.IsoCode, item.Item.ItemID, item.ItemsAvailable, time.Now())
+				store := domain.NewStore(storeName, item.Item.ItemID, item.ItemsAvailable, time.Now())
 				stores = append(stores, *store)
 			}
 		}
@@ -146,14 +146,10 @@ func (foodApi FoodApiImpl) checkStoresInResponse(response domain.FoodJson) []dom
 	return stores
 }
 
-func (foodApi FoodApiImpl) FilterStoresByCountry(countryCode string, availableStores []domain.Store) []domain.Store {
+func (foodApi FoodApiImpl) SaveStores(availableStores []domain.Store) []domain.Store {
 	var stores []domain.Store
 
-	for _, store := range availableStores {
-		if store.GetCountry() == countryCode {
-			stores = append(stores, store)
-		}
-	}
+	stores = append(stores, availableStores...)
 
 	if len(stores) > 0 {
 		foodApi.AddStores(stores)

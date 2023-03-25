@@ -4,22 +4,17 @@ import "time"
 
 type Store struct {
 	name           string
-	country        string
 	item           string
 	itemsAvailable int
 	createdAt      time.Time
 }
 
-func NewStore(name string, country string, item string, itemsAvailable int, createdAt time.Time) *Store {
-	return &Store{name, country, item, itemsAvailable, createdAt}
+func NewStore(name string, item string, itemsAvailable int, createdAt time.Time) *Store {
+	return &Store{name, item, itemsAvailable, createdAt}
 }
 
 func (s Store) GetName() string {
 	return s.name
-}
-
-func (s Store) GetCountry() string {
-	return s.country
 }
 
 func (s Store) GetItem() string {
@@ -35,7 +30,7 @@ func (s Store) GetCreatedAt() time.Time {
 }
 
 func (s Store) String() string {
-	return s.GetName() + " (" + s.GetCountry() + ")"
+	return s.GetName()
 }
 
 type StoreCounter struct {

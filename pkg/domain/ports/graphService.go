@@ -9,6 +9,6 @@ const FOOD_CHART_BY_HOUR_OF_DAY_YEARLY = "-food-by-hour-yearly.gif"
 const FOOD_CHART_BY_DAY_OF_WEEK_YEARLY = "-food-by-day-yearly.gif"
 
 type GraphService interface {
-	PrintAllMonthlyReports(countryCode string)
-	PrintAllYearlyReports(countryCode string)
+	PrintAllMonthlyReports()
+	PrintAllYearlyReports()
 }

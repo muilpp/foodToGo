@@ -10,8 +10,8 @@ func StoreToString(store domain.Store) string {
 	return store.GetName()
 }
 
-func StringToStore(name string, country string, itemsAvailable int, createdAt time.Time) *domain.Store {
-	return domain.NewStore(name, country, "", itemsAvailable, createdAt)
+func StringToStore(name string, itemsAvailable int, createdAt time.Time) *domain.Store {
+	return domain.NewStore(name, "", itemsAvailable, createdAt)
 }
 
 func StoresToString(stores []domain.Store) []string {
@@ -28,7 +28,7 @@ func StringsToStores(stringStores []string) []domain.Store {
 	var stores []domain.Store
 
 	for _, store := range stringStores {
-		stores = append(stores, *domain.NewStore(store, "", "", 0, time.Now()))
+		stores = append(stores, *domain.NewStore(store, "", 0, time.Now()))
 	}
 
 	return stores

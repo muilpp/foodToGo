@@ -9,7 +9,7 @@ import (
 )
 
 func TestStoreIsConvertedToString(t *testing.T) {
-	store := domain.NewStore("Meat shop", "ES", "", 1, time.Now())
+	store := domain.NewStore("Meat shop", "ES", 1, time.Now())
 	stringStore := StoreToString(*store)
 
 	assert.Equal(t, "Meat shop", stringStore)
@@ -17,7 +17,7 @@ func TestStoreIsConvertedToString(t *testing.T) {
 
 func TestStoreSliceIsConvertedToStringSlice(t *testing.T) {
 
-	stores := []domain.Store{*domain.NewStore("Meat shop", "ES", "", 1, time.Now()), *domain.NewStore("Fish shop", "FR", "", 2, time.Now())}
+	stores := []domain.Store{*domain.NewStore("Meat shop", "ES", 1, time.Now()), *domain.NewStore("Fish shop", "FR", 2, time.Now())}
 	stringStores := StoresToString(stores)
 
 	assert.Equal(t, 2, len(stringStores))
@@ -26,10 +26,9 @@ func TestStoreSliceIsConvertedToStringSlice(t *testing.T) {
 }
 
 func TestStringIsConvertedToStore(t *testing.T) {
-	store := StringToStore("Meat shop", "ES", 1, time.Now())
+	store := StringToStore("Meat shop", 1, time.Now())
 
 	assert.Equal(t, "Meat shop", store.GetName())
-	assert.Equal(t, "ES", store.GetCountry())
 	assert.Equal(t, 1, store.GetItemsAvailable())
 }
 
@@ -43,7 +42,7 @@ func TestStringSliceIsConvertedToStoreSlice(t *testing.T) {
 }
 
 func TestStoreSliceContainsStoreName(t *testing.T) {
-	stores := []domain.Store{*domain.NewStore("Meat shop", "ES", "", 1, time.Now()), *domain.NewStore("Fish shop", "FR", "", 2, time.Now()), *domain.NewStore("Candy shop", "IT", "", 3, time.Now())}
+	stores := []domain.Store{*domain.NewStore("Meat shop", "", 1, time.Now()), *domain.NewStore("Fish shop", "", 2, time.Now()), *domain.NewStore("Candy shop", "", 3, time.Now())}
 
 	assert.True(t, StoresContainStoreName(stores, "Meat shop"))
 	assert.True(t, StoresContainStoreName(stores, "Fish shop"))
@@ -52,8 +51,8 @@ func TestStoreSliceContainsStoreName(t *testing.T) {
 }
 
 func TestRemoveStoresFromSlice(t *testing.T) {
-	originalStores := []domain.Store{*domain.NewStore("Meat shop", "ES", "", 1, time.Now()), *domain.NewStore("Fish shop", "FR", "", 2, time.Now()), *domain.NewStore("Candy shop", "IT", "", 3, time.Now())}
-	storesToRemove := []domain.Store{*domain.NewStore("Fish shop", "FR", "", 2, time.Now())}
+	originalStores := []domain.Store{*domain.NewStore("Meat shop", "", 1, time.Now()), *domain.NewStore("Fish shop", "", 2, time.Now()), *domain.NewStore("Candy shop", "", 3, time.Now())}
+	storesToRemove := []domain.Store{*domain.NewStore("Fish shop", "", 2, time.Now())}
 
 	stores := RemoveStoresFromSlice(originalStores, storesToRemove)
 

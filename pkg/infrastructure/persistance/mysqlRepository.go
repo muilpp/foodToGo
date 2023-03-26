@@ -14,6 +14,11 @@ type StoreTable struct {
 	Store string
 }
 
+type Reservation struct {
+	gorm.Model
+	Store string
+}
+
 type Result struct {
 	Element string
 	Total   int
@@ -40,6 +45,7 @@ func intialMigration(user string, pwd string, ip string, database string) {
 		zap.L().Panic("Failed to connect to database: ", zap.Error(err))
 	}
 
+	db.AutoMigrate(&Reservation{})
 	db.AutoMigrate(&StoreTable{})
 	db.AutoMigrate(&BearerTable{})
 	db.AutoMigrate(&RefreshTokenTable{})
@@ -149,6 +155,15 @@ func (db *MysqlRepository) GetStoresByHourOfDay(frequency string) []domain.Store
 func (db *MysqlRepository) AddStores(stores []domain.Store) {
 	database := openConnection(db.user, db.pwd, db.ip, db.database)
 	database.CreateInBatches(StoreObjectsToStoreTables(stores), 10)
+}
+
+func (db *MysqlRepository) GetReservations() []string {
+	database := openConnection(db.user, db.pwd, db.ip, db.database)
+
+	var reservation []Reservation
+	database.Find(&reservation)
+
+	return ReservationTableToStoreObjects(reservation)
 }
 
 func openConnection(user string, pwd string, ip string, database string) *gorm.DB {

@@ -14,12 +14,13 @@ import (
 
 type FileRepository struct {
 	bearerFileName       string
-	storesFileName       string
 	refreshTokenFileName string
+	storesFileName       string
+	reservationFileName  string
 }
 
-func NewFileRepository(bearerFileName string, storesFileName string, refreshTokenFileName string) *FileRepository {
-	return &FileRepository{bearerFileName: bearerFileName, storesFileName: storesFileName, refreshTokenFileName: refreshTokenFileName}
+func NewFileRepository(bearerFileName string, storesFileName string, refreshTokenFileName string, reservationFileName string) *FileRepository {
+	return &FileRepository{bearerFileName: bearerFileName, storesFileName: storesFileName, refreshTokenFileName: refreshTokenFileName, reservationFileName: reservationFileName}
 }
 
 func (fs *FileRepository) GetBearer() string {
@@ -102,6 +103,13 @@ func (fs *FileRepository) AddStores(stores []domain.Store) {
 			zap.L().Fatal(err2.Error())
 		}
 	}
+}
+
+func (fs *FileRepository) GetReservations() []string {
+	return strings.Split(fs.readFile(fs.reservationFileName), "\n")
+}
+
+func (fs *FileRepository) ReserveFood([]domain.Store, []string) {
 }
 
 func (fs *FileRepository) readFile(fileName string) string {

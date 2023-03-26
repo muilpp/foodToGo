@@ -1,7 +1,11 @@
 package ports
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/marc/get-food-to-go/pkg/domain"
+	"go.uber.org/zap"
 )
 
 type StoreService interface {
@@ -11,6 +15,8 @@ type StoreService interface {
 	UpdateRefreshToken(token string)
 	GetStores() []domain.Store
 	AddStores(stores []domain.Store)
+	GetReservations() []string
+	ReserveFood([]domain.Store, []string)
 }
 
 type Repository interface {
@@ -23,6 +29,7 @@ type Repository interface {
 	GetStoresByDayOfWeek(frequency string) []domain.StoreCounter
 	GetStoresByHourOfDay(frequency string) []domain.StoreCounter
 	AddStores(stores []domain.Store)
+	GetReservations() []string
 }
 
 type storeService struct {
@@ -55,4 +62,23 @@ func (s storeService) GetStores() []domain.Store {
 
 func (s storeService) AddStores(stores []domain.Store) {
 	s.repository.AddStores(stores)
+}
+
+func (s storeService) GetReservations() []string {
+	return s.repository.GetReservations()
+}
+
+func (s storeService) ReserveFood(stores []domain.Store, reservations []string) {
+	zap.L().Info("Reservations: " + strconv.Itoa(len(reservations)))
+
+	for _, reservation := range reservations {
+		zap.L().Info("Reservation: " + reservation)
+		for _, store := range stores {
+			zap.L().Info("Store: " + store.GetName())
+
+			if strings.Contains(strings.ToLower(store.GetName()), strings.ToLower(reservation)) {
+				zap.L().Info("Tinc reserva per: " + store.GetName())
+			}
+		}
+	}
 }

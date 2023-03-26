@@ -25,13 +25,15 @@ func parseJsonResponse(response []byte) domain.FoodJson {
 type RepositoryMock struct {
 	bearerFile             string
 	storeFile              string
+	reservationsFile       string
 	ReadStoresFromFileMock func() []domain.Store
 }
 
-func newRepositoryMock(bearerFile string, storeFile string) RepositoryMock {
+func newRepositoryMock(bearerFile string, storeFile string, reservations string) RepositoryMock {
 	return RepositoryMock{
-		bearerFile: bearerFile,
-		storeFile:  storeFile,
+		bearerFile:       bearerFile,
+		storeFile:        storeFile,
+		reservationsFile: reservations,
 		ReadStoresFromFileMock: func() []domain.Store {
 			return []domain.Store{*domain.NewStore("Osakii - Mainz - Abendbuffet", "", 1, time.Now())}
 		},
@@ -68,11 +70,19 @@ func (fs RepositoryMock) UpdateRefreshToken(bearer string) {}
 func (fs RepositoryMock) AddStores(stores []domain.Store) {
 }
 
+func (fs RepositoryMock) GetReservations() []string {
+	return []string{}
+}
+
+func (fs RepositoryMock) ReserveFood([]domain.Store, []string) {
+
+}
+
 func TestStoresResponseParse(t *testing.T) {
 	response := []byte("{\"items\":[{\"item\":{\"item_id\":\"796374\",\"name\":\"Abendbuffet\"},\"store\":{\"store_id\":\"768562\",\"store_name\":\"Villa Wow - Berlin\"},\"display_name\":\"Villa Wow - Berlin\",\"items_available\":3},{\"item\":{\"item_id\":\"796374\",\"name\":\"Entrepans\"},\"store\":{\"store_id\":\"768562\",\"store_name\":\"Mini Golf\"},\"display_name\":\"Mini Golf\",\"items_available\":2}]}")
 	responseStruct := parseJsonResponse(response)
 
-	repoMock := newRepositoryMock("", "")
+	repoMock := newRepositoryMock("", "", "")
 	foodApi := NewFoodApi(NewFoodApiAuth(repoMock), NewFoodApiAuth(repoMock), repoMock, "", "", "")
 
 	stores := foodApi.checkStoresInResponse(responseStruct)
@@ -88,7 +98,7 @@ func TestOnlyStoresWithItemsAvailableAdded(t *testing.T) {
 	response := []byte("{\"items\":[{\"item\":{\"item_id\":\"796374\",\"name\":\"Abendbuffet\"},\"store\":{\"store_id\":\"768562\",\"store_name\":\"Osakii - Mainz\"},\"display_name\":\"Osakii - Mainz\",\"items_available\":3},{\"item\":{\"item_id\":\"796374\",\"name\":\"Entrepans\"},\"store\":{\"store_id\":\"768562\",\"store_name\":\"Mini Golf\"},\"display_name\":\"Mini Golf\",\"items_available\":0}]}")
 	responseStruct := parseJsonResponse(response)
 
-	repoMock := newRepositoryMock("", "")
+	repoMock := newRepositoryMock("", "", "")
 	repoMock.ReadStoresFromFileMock = func() []domain.Store {
 		return []domain.Store{}
 	}
@@ -106,7 +116,7 @@ func TestStoresNotAddedIfAlreadyPresentInFile(t *testing.T) {
 	response := []byte("{\"items\":[{\"item\":{\"item_id\":\"796374\",\"name\":\"Abendbuffet\"},\"store\":{\"store_id\":\"768562\",\"store_name\":\"Osakii - Mainz\"},\"display_name\":\"Osakii - Mainz\",\"items_available\":3},{\"item\":{\"item_id\":\"796374\",\"name\":\"Entrepans\"},\"store\":{\"store_id\":\"768562\",\"store_name\":\"Mini Golf\"},\"display_name\":\"Mini Golf\",\"items_available\":2},{\"item\":{\"item_id\":\"796374\",\"name\":\"Bocadillos\"},\"store\":{\"store_id\":\"768562\",\"store_name\":\"Frankfurt 92\"},\"display_name\":\"Frankfurt 92\",\"items_available\":3}]}")
 	responseStruct := parseJsonResponse(response)
 
-	repoMock := newRepositoryMock("", "")
+	repoMock := newRepositoryMock("", "", "")
 	foodApi := NewFoodApi(NewFoodApiAuth(repoMock), NewFoodApiAuth(repoMock), repoMock, "", "", "")
 
 	stores := foodApi.checkStoresInResponse(responseStruct)
@@ -119,7 +129,7 @@ func TestStoresNotAddedIfAlreadyPresentInFile(t *testing.T) {
 }
 
 func TestBuildRequestIsCorrectlyBuilt(t *testing.T) {
-	repoMock := newRepositoryMock("", "")
+	repoMock := newRepositoryMock("", "", "")
 	foodApi := NewFoodApi(NewFoodApiAuth(repoMock), NewFoodApiAuth(repoMock), repoMock, "123", "10", "20")
 	bodyRequest := foodApi.buildRequestBody()
 
@@ -140,7 +150,7 @@ func (authMock foodAuthMock) Login() string {
 
 func TestNoStoresFoundWhenAuthBearerIsIncorrect(t *testing.T) {
 
-	repositoryMock := newRepositoryMock("", "")
+	repositoryMock := newRepositoryMock("", "", "")
 	foodApi := NewFoodApi(newFoodAuthMock(repositoryMock), NewFoodApiAuth(repositoryMock), repositoryMock, "userId", "latitude", "longitude")
 	stores := foodApi.GetStoresWithFood()
 

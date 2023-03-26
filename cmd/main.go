@@ -25,6 +25,7 @@ var foodApi ports.FoodService
 const STORES_FILE_NAME = "pkg/resources/availableStores.txt"
 const BEARER_FILE_NAME = "pkg/resources/authBearer.txt"
 const REFRESH_TOKEN_FILE_NAME = "pkg/resources/refreshToken.txt"
+const RESERVATIONS_FILE_NAME = "pkg/resources/reservations.txt"
 
 func init() {
 	infrastructure.InitLogger()
@@ -35,7 +36,7 @@ func init() {
 	}
 
 	if os.Getenv("DB_USER") == "" {
-		repository = persistance.NewFileRepository(BEARER_FILE_NAME, STORES_FILE_NAME, REFRESH_TOKEN_FILE_NAME)
+		repository = persistance.NewFileRepository(BEARER_FILE_NAME, STORES_FILE_NAME, REFRESH_TOKEN_FILE_NAME, RESERVATIONS_FILE_NAME)
 	} else {
 		repository = persistance.NewMysqlRepository(os.Getenv("DB_USER"), os.Getenv("DB_PWD"), os.Getenv("DB_IP"), os.Getenv("DB_NAME"))
 	}
@@ -59,6 +60,11 @@ func main() {
 
 			stores := foodApi.SaveStores(availableStores)
 			notificationService.SendNotification(stores)
+
+			reservations := storeService.GetReservations()
+			if len(reservations) > 0 {
+				storeService.ReserveFood(stores, reservations)
+			}
 		}
 	} else if executionType == "printGraph" {
 		graphService = infrastructure.NewGraphService(repository)

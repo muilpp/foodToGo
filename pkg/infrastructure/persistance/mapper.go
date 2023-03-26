@@ -46,3 +46,14 @@ func StoreTableCountResultsToStoreCounterObjects(storeTables []Result) []domain.
 
 	return storesCounter
 }
+
+func ReservationTableToStoreObjects(reservation []Reservation) []string {
+
+	var stores []string
+
+	for _, v := range reservation {
+		stores = append(stores, v.Store)
+	}
+
+	return stores
+}

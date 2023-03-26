@@ -65,7 +65,7 @@ func (ns NotificationServiceImpl) sendTelegramMessage(stores []domain.Store) {
 		_, err2 := bot.Send(msg)
 
 		if err2 != nil {
-			zap.L().Error("Message not sent", zap.Error(err2))
+			zap.L().Error("Store message not sent", zap.Error(err2))
 		}
 	}
 }
@@ -118,9 +118,20 @@ func (ns NotificationServiceImpl) sendFile(fileName string, bot *tgbotapi.BotAPI
 	}
 }
 
-func (ns NotificationServiceImpl) SendNotification(stores []domain.Store) {
+func (ns NotificationServiceImpl) SendAvailableStoresNotification(stores []domain.Store) {
 	if len(stores) > 0 {
 		ns.sendMail(stores)
 		ns.sendTelegramMessage(stores)
+	}
+}
+
+func (ns NotificationServiceImpl) SendReservationNotification(storeName string, itemID string) {
+	telegramChatId, bot := getTelegramCredentials()
+
+	msg := tgbotapi.NewMessage(telegramChatId, "Reservation made for "+storeName+", item id: "+itemID, true)
+	_, err2 := bot.Send(msg)
+
+	if err2 != nil {
+		zap.L().Error("Reservation message not sent", zap.Error(err2))
 	}
 }

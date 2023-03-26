@@ -59,11 +59,11 @@ func main() {
 			zap.L().Info("Found shop(s): " + storesString)
 
 			stores := foodApi.SaveStores(availableStores)
-			notificationService.SendNotification(stores)
+			notificationService.SendAvailableStoresNotification(stores)
 
 			reservations := storeService.GetReservations()
 			if len(reservations) > 0 {
-				storeService.ReserveFood(stores, reservations)
+				foodApi.ReserveFood(stores, reservations)
 			}
 		}
 	} else if executionType == "printGraph" {

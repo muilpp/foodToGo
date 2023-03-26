@@ -6,6 +6,7 @@ type FoodService interface {
 	GetStoresWithFood() []domain.Store
 	SaveStores(availableStores []domain.Store) []domain.Store
 	AddStores(stores []domain.Store)
+	ReserveFood([]domain.Store, []string)
 }
 
 type FoodServiceAuth interface {

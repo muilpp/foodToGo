@@ -16,7 +16,8 @@ type StoreTable struct {
 
 type Reservation struct {
 	gorm.Model
-	Store string
+	Store         string
+	AlwaysReserve bool
 }
 
 type Result struct {
@@ -157,7 +158,7 @@ func (db *MysqlRepository) AddStores(stores []domain.Store) {
 	database.CreateInBatches(StoreObjectsToStoreTables(stores), 10)
 }
 
-func (db *MysqlRepository) GetReservations() []string {
+func (db *MysqlRepository) GetReservations() []domain.ReservationStore {
 	database := openConnection(db.user, db.pwd, db.ip, db.database)
 
 	var reservation []Reservation

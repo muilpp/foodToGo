@@ -105,8 +105,8 @@ func (fs *FileRepository) AddStores(stores []domain.Store) {
 	}
 }
 
-func (fs *FileRepository) GetReservations() []string {
-	return strings.Split(fs.readFile(fs.reservationFileName), "\n")
+func (fs *FileRepository) GetReservations() []domain.ReservationStore {
+	return []domain.ReservationStore{}
 }
 
 func (fs *FileRepository) ReserveFood([]domain.Store, []string) {

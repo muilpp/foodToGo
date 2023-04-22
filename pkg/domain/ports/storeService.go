@@ -11,7 +11,7 @@ type StoreService interface {
 	UpdateRefreshToken(token string)
 	GetStores() []domain.Store
 	AddStores(stores []domain.Store)
-	GetReservations() []string
+	GetReservations() []domain.ReservationStore
 }
 
 type Repository interface {
@@ -24,7 +24,7 @@ type Repository interface {
 	GetStoresByDayOfWeek(frequency string) []domain.StoreCounter
 	GetStoresByHourOfDay(frequency string) []domain.StoreCounter
 	AddStores(stores []domain.Store)
-	GetReservations() []string
+	GetReservations() []domain.ReservationStore
 }
 
 type storeService struct {
@@ -59,6 +59,6 @@ func (s storeService) AddStores(stores []domain.Store) {
 	s.repository.AddStores(stores)
 }
 
-func (s storeService) GetReservations() []string {
+func (s storeService) GetReservations() []domain.ReservationStore {
 	return s.repository.GetReservations()
 }

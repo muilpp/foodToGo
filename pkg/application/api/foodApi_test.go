@@ -70,8 +70,8 @@ func (fs RepositoryMock) UpdateRefreshToken(bearer string) {}
 func (fs RepositoryMock) AddStores(stores []domain.Store) {
 }
 
-func (fs RepositoryMock) GetReservations() []string {
-	return []string{}
+func (fs RepositoryMock) GetReservations() []domain.ReservationStore {
+	return []domain.ReservationStore{}
 }
 
 func (fs RepositoryMock) ReserveFood([]domain.Store, []string) {

@@ -17,7 +17,6 @@ import (
 )
 
 const MAX_TRIES = 1
-const NUM_ITEMS_TO_BOOK = 2
 
 var currentTries int
 
@@ -158,12 +157,18 @@ func (foodApi FoodApiImpl) AddStores(stores []domain.Store) {
 	foodApi.storeService.AddStores(stores)
 }
 
-func (foodApi FoodApiImpl) ReserveFood(stores []domain.Store, reservations []string) {
+func (foodApi FoodApiImpl) ReserveFood(stores []domain.Store, reservations []domain.ReservationStore) {
+	NUM_ITEMS_TO_BOOK := 2
+
 	for _, reservation := range reservations {
 		for _, store := range stores {
-			if strings.Contains(strings.ToLower(store.GetName()), strings.ToLower(reservation)) {
+			if strings.Contains(strings.ToLower(store.GetName()), strings.ToLower(reservation.GetName())) {
 				if store.GetItemsAvailable() < NUM_ITEMS_TO_BOOK {
-					continue
+					if reservation.IsAlwaysReserve() {
+						NUM_ITEMS_TO_BOOK = 1
+					} else {
+						continue
+					}
 				}
 
 				resp := foodApi.requestFoodReservation(foodApi.getBearerToken(), store.GetItem(), NUM_ITEMS_TO_BOOK)

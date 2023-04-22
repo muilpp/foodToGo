@@ -29,10 +29,6 @@ func (s Store) GetCreatedAt() time.Time {
 	return s.createdAt
 }
 
-func (s Store) String() string {
-	return s.GetName()
-}
-
 type StoreCounter struct {
 	name  string
 	total int
@@ -48,4 +44,21 @@ func (s StoreCounter) GetName() string {
 
 func (s StoreCounter) GetTotal() int {
 	return s.total
+}
+
+type ReservationStore struct {
+	name          string
+	alwaysReserve bool
+}
+
+func NewReservationStore(name string, alwaysReserve bool) *ReservationStore {
+	return &ReservationStore{name, alwaysReserve}
+}
+
+func (s ReservationStore) GetName() string {
+	return s.name
+}
+
+func (s ReservationStore) IsAlwaysReserve() bool {
+	return s.alwaysReserve
 }
